@@ -1,21 +1,22 @@
 package com.cadastro.pix.service;
 
-import com.cadastro.pix.domain.Account;
-import com.cadastro.pix.domain.User;
-import com.cadastro.pix.domain.User;
+import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.domain.user.User;
+import com.cadastro.pix.domain.user.dto.UserDTO;
+import com.cadastro.pix.domain.user.dto.UserListDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
-import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -24,67 +25,96 @@ public class UserService {
     private UserRepository userRepository;
 
     @Transactional
-    public User createUser(@Valid User user) {
+    public RespDTO createUser(@Valid User user) {
         validateCreateUser(user);
 
-        user.setAtivo(true);
+        user.setActive(true);
 
-        return userRepository.save(user);
+        UserDTO userDTO = new UserDTO(userRepository.save(user).getId());
+        return new RespDTO(HttpStatus.OK, userDTO);
     }
 
-    public static UUID bytesToUUID(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long high = bb.getLong();
-        long low = bb.getLong();
-        return new UUID(high, low);
+    public RespDTO findAllUsers() {
+        List<User> users = userRepository.findAll();
+        UserListDTO usersDTO = UserListDTO.fromUsers(users);
+
+        return new RespDTO(HttpStatus.OK, usersDTO);
     }
 
-    @Transactional
-    public User updateUser(UUID id, User user) {
+    public RespDTO findUserById(UUID id) {
         User existingUser = userRepository.findById(id);
         if (existingUser == null) {
             throw new EntityNotFoundException("Conta nao encontrada");
         }
 
-        if (!existingUser.isAtivo()) {
+        UserDTO userDTO = new UserDTO(userRepository.save(existingUser));
+        return new RespDTO(HttpStatus.OK, userDTO);
+    }
+
+    @Transactional
+    public RespDTO updateUser(UUID id, User user) {
+        User existingUser = userRepository.findById(id);
+        if (existingUser == null) {
+            throw new EntityNotFoundException("Usuario nao encontrado");
+        }
+
+        if (!existingUser.isActive()) {
             throw new IllegalArgumentException("Usuario inativo");
         }
         
         validateUpdatedFields(user);
         
-        existingUser.setNomeCorrentista(user.getNomeCorrentista());
-        existingUser.setSobrenomeCorrentista(user.getSobrenomeCorrentista());
-        existingUser.setCelular(user.getCelular());
+        existingUser.setUserName(user.getUserName());
+        existingUser.setUserLastName(user.getUserLastName());
+        existingUser.setPhone(user.getPhone());
         existingUser.setEmail(user.getEmail());
 
-        return userRepository.save(existingUser);
+        //updatedAt so vem atualizado na segunda chamada
+        User updatedUser = userRepository.save(existingUser);
+        UserDTO userDTO = new UserDTO(updatedUser);
+        return new RespDTO(HttpStatus.OK, userDTO);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    @Transactional
+    public RespDTO deleteUser(UUID id) {
+        User existingUser = userRepository.findById(id);
+        if (existingUser == null) {
+            throw new EntityNotFoundException("User nao encontrado");
+        }
+
+        if (!existingUser.isActive()) {
+            throw new IllegalArgumentException("User ja esta inativo");
+        }
+
+        // Inativa a chave Pix e registra a data e hora da inativação
+        existingUser.setActive(false);
+        existingUser.setInactivatedAt(LocalDateTime.now());
+
+        UserDTO userDTO = new UserDTO(userRepository.save(existingUser));
+        return new RespDTO(HttpStatus.OK, userDTO);
     }
     
     private void validateCreateUser(User user) {
         validateExistUser(user);
-        validateNomeCorrentista(user.getNomeCorrentista());
-        validateSobrenomeCorrentista(user.getSobrenomeCorrentista());
-        validateCelular(user.getCelular());
+        validateNomeCorrentista(user.getUserName());
+        validateSobrenomeCorrentista(user.getUserLastName());
+        validateCelular(user.getPhone());
         validateEmail(user.getEmail());
         validateIdentificacao(user);
     }
 
     private void validateUpdatedFields(User user) {
-        validateNomeCorrentista(user.getNomeCorrentista());
-        validateSobrenomeCorrentista(user.getSobrenomeCorrentista());
-        validateCelular(user.getCelular());
+        validateNomeCorrentista(user.getUserName());
+        validateSobrenomeCorrentista(user.getUserLastName());
+        validateCelular(user.getPhone());
         validateEmail(user.getEmail());
         validateIdentificacao(user);
     }
 
     private void validateExistUser(User user) {
-        User existUser = userRepository.findByIdentificacao(user.getIdentificacao());
+        User existUser = userRepository.findByIdentification(user.getIdentification());
         if (existUser != null) {
-            if(existUser.isAtivo()) throw new IllegalArgumentException("Ja existe um usuario com esta identificaçao");
+            if(existUser.isActive()) throw new IllegalArgumentException("Ja existe um usuario com esta identificaçao");
 
             throw new IllegalArgumentException("Ja existe um usuario inativo com esta identificaçao");
         }
@@ -109,16 +139,22 @@ public class UserService {
     }
 
     private void validateEmail(String valorChave) {
-        if (!valorChave.contains("@") || valorChave.length() > 77) {
+        // Deve ter o modelo "texto@texto.texto"
+        final String emailRegexPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+        Pattern pattern = Pattern.compile(emailRegexPattern);
+        Matcher matcher = pattern.matcher(valorChave);
+
+        if(!matcher.matches() || valorChave.length() > 77){
             throw new IllegalArgumentException("E-mail inválido");
         }
     }
 
     private void validateIdentificacao(User user) {
-        if(user.isPessoaFisica()) {
-            validateCPF(user.getIdentificacao());
-        } else if(user.isPessoaJuridica()) {
-            validateCNPJ(user.getIdentificacao());
+        if(user.isPhysicalPerson()) {
+            validateCPF(user.getIdentification());
+        } else if(user.isLegalPerson()) {
+            validateCNPJ(user.getIdentification());
         } else {
             throw new IllegalArgumentException("Tipo de pessoa inválido");
         }
@@ -156,7 +192,9 @@ public class UserService {
     }
 
     private void validateCNPJ(String valorChave) {
-        valorChave = valorChave.replaceAll("[^0-9]", "");
+        if (!isNumeric(valorChave)) {
+            throw new IllegalArgumentException("O CNPJ deve conter apenas números");
+        }
         if (valorChave.length() != 14 || valorChave.matches("(\\d)\\1{13}")) {
             throw new IllegalArgumentException("CNPJ inválido");
         }

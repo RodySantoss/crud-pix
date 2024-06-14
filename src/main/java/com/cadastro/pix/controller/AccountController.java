@@ -1,15 +1,17 @@
 package com.cadastro.pix.controller;
 
-import com.cadastro.pix.domain.Account;
-import com.cadastro.pix.domain.PixKey;
+import com.cadastro.pix.domain.account.Account;
 import com.cadastro.pix.domain.ReqObj;
+import com.cadastro.pix.domain.RespDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.service.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,44 +26,112 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<?> createAccount(@Valid @RequestBody ReqObj reqObj) {
+    public ResponseEntity<RespDTO> createAccount(@Valid @RequestBody ReqObj reqObj) {
         try {
-            Account createdAccount = accountService.createAccount(reqObj);
-            return ResponseEntity.status(HttpStatus.OK).body(createdAccount.getId());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateAccount(@PathVariable String id, @Valid @RequestBody Account account) {
-        try {
-            Account updatedAccount = accountService.updateAccount(id, account);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedAccount);
+            RespDTO respDTO = accountService.createAccount(reqObj);
+            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAllPixKeys() {
-        List<Account> accounts = accountService.getAllAccounts();
-        return ResponseEntity.ok(accounts);
+    public ResponseEntity<RespDTO> findAllAccounts() {
+        try {
+            RespDTO respDTO = accountService.findAllAccounts();
+            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
+        } catch (EntityNotFoundException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<?> getPixKeyById(@PathVariable UUID id) {
-//        return pixKeyService.getPixKeyById(id);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<?> deletePixKey(@PathVariable UUID id) {
-//        try {
-//            return pixKeyService.deletePixKey(id);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
-//        }
-//    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RespDTO> findAccountById(@PathVariable UUID id) {
+        try {
+            RespDTO respDTO = accountService.findAccountById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
+        } catch (EntityNotFoundException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RespDTO> updateAccount(@PathVariable String id, @Valid @RequestBody Account account) {
+        try {
+            RespDTO respDTO = accountService.updateAccount(id, account);
+            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
+        } catch (EntityNotFoundException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<RespDTO> deleteAccount(@PathVariable UUID id) {
+        try {
+            RespDTO respDTO =  accountService.deleteAccount(id);
+            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
+        } catch (EntityNotFoundException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.NOT_FOUND,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            RespDTO respDTO = new RespDTO(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    e.getMessage()
+            );
+            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<RespDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        FieldError error = (FieldError) ex.getBindingResult().getAllErrors().get(0);
+        RespDTO respDTO = new RespDTO(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                error.getDefaultMessage()
+        );
+        return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 }
