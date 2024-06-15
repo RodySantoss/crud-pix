@@ -1,2 +1,5 @@
+com/cadastro/pix/service/AccountServiceTest.class
+com/cadastro/pix/service/UserServiceTest.class
+com/cadastro/pix/service/PixKeyServiceTest.class
 com/cadastro/pix/controller/UserControllerTest.class
 com/cadastro/pix/PixApplicationTests.class

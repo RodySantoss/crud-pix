@@ -62,7 +62,7 @@ public class UserService {
             throw new IllegalArgumentException("Usuario inativo");
         }
         
-        validateUpdatedFields(user);
+        validateUpdatedFields(user, existingUser.getPersonType());
         
         existingUser.setUserName(user.getUserName());
         existingUser.setUserLastName(user.getUserLastName());
@@ -103,7 +103,8 @@ public class UserService {
         validateIdentificacao(user);
     }
 
-    private void validateUpdatedFields(User user) {
+    private void validateUpdatedFields(User user, String existingUserType) {
+        validateUserType(user.getPersonType(), existingUserType);
         validateNomeCorrentista(user.getUserName());
         validateSobrenomeCorrentista(user.getUserLastName());
         validateCelular(user.getPhone());
@@ -120,8 +121,14 @@ public class UserService {
         }
     }
 
+    private void validateUserType(String existingUserType, String newUserType) {
+        if (existingUserType != newUserType) {
+            throw new IllegalArgumentException("Nao e possivel trocar o tipo de pessoa");
+        }
+    }
+
     private void validateNomeCorrentista(String nome) {
-        if (nome == null || nome.length() > 30) {
+        if (nome == null || nome.isEmpty()|| nome.length() > 30) {
             throw new IllegalArgumentException("Nome do correntista inválido");
         }
     }

@@ -1,0 +1,47 @@
+-------------------------------------------------------------------------------
+Test set: com.cadastro.pix.service.PixKeyServiceTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 2, Errors: 1, Skipped: 0, Time elapsed: 1.226 s <<< FAILURE! -- in com.cadastro.pix.service.PixKeyServiceTest
+com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_PhysicalPersonLimitExceeded -- Time elapsed: 0.015 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.NullPointerException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_PhysicalPersonLimitExceeded(PixKeyServiceTest.java:173)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.lang.NullPointerException: Cannot invoke "String.toLowerCase()" because the return value of "com.cadastro.pix.domain.pixKey.PixKey.getKeyType()" is null
+	at com.cadastro.pix.service.PixKeyService.validateCreatePixKey(PixKeyService.java:206)
+	at com.cadastro.pix.service.PixKeyService.createPixKey(PixKeyService.java:55)
+	at com.cadastro.pix.service.PixKeyServiceTest.lambda$testCreatePixKey_PhysicalPersonLimitExceeded$3(PixKeyServiceTest.java:174)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+
+com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_LegalPersonLimitExceeded -- Time elapsed: 0.012 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.NullPointerException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_LegalPersonLimitExceeded(PixKeyServiceTest.java:199)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+Caused by: java.lang.NullPointerException: Cannot invoke "String.toLowerCase()" because the return value of "com.cadastro.pix.domain.pixKey.PixKey.getKeyType()" is null
+	at com.cadastro.pix.service.PixKeyService.validateCreatePixKey(PixKeyService.java:206)
+	at com.cadastro.pix.service.PixKeyService.createPixKey(PixKeyService.java:55)
+	at com.cadastro.pix.service.PixKeyServiceTest.lambda$testCreatePixKey_LegalPersonLimitExceeded$4(PixKeyServiceTest.java:200)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+
+com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_Success -- Time elapsed: 0.011 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "String.toLowerCase()" because the return value of "com.cadastro.pix.domain.pixKey.PixKey.getKeyType()" is null
+	at com.cadastro.pix.service.PixKeyService.validateCreatePixKey(PixKeyService.java:206)
+	at com.cadastro.pix.service.PixKeyService.createPixKey(PixKeyService.java:55)
+	at com.cadastro.pix.service.PixKeyServiceTest.testCreatePixKey_Success(PixKeyServiceTest.java:114)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
