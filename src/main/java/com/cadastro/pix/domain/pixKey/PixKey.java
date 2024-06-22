@@ -1,6 +1,7 @@
 package com.cadastro.pix.domain.pixKey;
 
 import com.cadastro.pix.domain.account.Account;
+import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -28,7 +29,7 @@ public class PixKey {
     private String keyType;
 
     @NotNull
-    @Column(name = "key_value", nullable = false, length = 77, unique = true)
+    @Column(name = "key_value", nullable = false, length = 77)
     private String keyValue;
 
     @JsonIgnore
@@ -49,6 +50,11 @@ public class PixKey {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public PixKey(CreatePixKeyDTO pixKeyDTO) {
+        this.keyType = pixKeyDTO.getKeyType();
+        this.keyValue = pixKeyDTO.getKeyValue();
+    }
 
     // Custom methods
     public boolean isActive() {

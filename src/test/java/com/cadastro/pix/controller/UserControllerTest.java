@@ -1,43 +1,32 @@
 package com.cadastro.pix.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
 import com.cadastro.pix.domain.RespDTO;
 import com.cadastro.pix.domain.user.User;
-import com.cadastro.pix.domain.user.dto.UserDTO;
-import com.cadastro.pix.domain.user.dto.UserListDTO;
+import com.cadastro.pix.dto.user.UserDTO;
+import com.cadastro.pix.dto.user.UserListDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-@ExtendWith(MockitoExtension.class)
-public class UserControllerTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-    private MockMvc mockMvc;
+class UserControllerTest {
 
     @Mock
     private UserService userService;
@@ -45,145 +34,202 @@ public class UserControllerTest {
     @InjectMocks
     private UserController userController;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @BeforeEach
-    public void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();  // Initialize objectMapper if not using Spring Context
-        mockMvc = standaloneSetup(userController).build();
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    private User validUser() {
+        User newUser = new User();
+        newUser.setPersonType("fisica");
+        newUser.setUserName("João");
+        newUser.setUserLastName("Silva");
+        newUser.setPhone("+5511998765432");
+        newUser.setEmail("joao.silva@teste.com");
+        newUser.setIdentification("48428781850");
+        newUser.setActive(true);
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setUpdatedAt(LocalDateTime.now());
+
+        return newUser;
     }
 
     @Test
-    public void givenValidParams_whenCreteUser_return200() throws Exception {
-        User user = new User();
-        user.setUserName("Fernanda");
-        user.setPersonType("fisica");
-        user.setUserLastName("Mukai dos Santos");
-        user.setIdentification("36216995898");
-        user.setPhone("+5511976110609");
-        user.setEmail("teste@gmail.com");
-        user.setActive(true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+    void testCreateUser_Success() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+        user.setId(id);
 
-        RespDTO respDTO = new RespDTO(HttpStatus.OK, new UserDTO(user));
-
-        when(userService.createUser(any(User.class))).thenReturn(respDTO);
-
-        mockMvc.perform(post("/api/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.httpStatus").value("200 OK"))
-                .andExpect(jsonPath("$.data.user.userName").value("Fernanda"));
-    }
-
-    @Test
-    public void havingUser_whenFindAllUsers_return200() throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserName("Fernanda");
-        List<UserDTO> users = Arrays.asList(userDTO);
-        UserListDTO userListDTO = new UserListDTO(users);
-
-        RespDTO respDTO = new RespDTO(HttpStatus.OK, userListDTO);
-        when(userService.findAllUsers()).thenReturn(respDTO);
-
-        mockMvc.perform(get("/api/user"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.httpStatus").value("200 OK"))
-                .andExpect(jsonPath("$.data.users[0].userName").value("Fernanda"));
-    }
-
-    @Test
-    public void testFindUserById_EntityNotFound() throws Exception {
-        UUID userId = UUID.randomUUID();
-
-        // Simulando que userService.findUserById lançará EntityNotFoundException
-        when(userService.findUserById(userId)).thenThrow(new EntityNotFoundException("User not found"));
-
-        mockMvc.perform(get("/api/user/" + userId.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.httpStatus").value(HttpStatus.NOT_FOUND.toString()))
-                .andExpect(jsonPath("$.message").value("User not found"));
-    }
-
-    @Test
-    public void testFindUserById() throws Exception {
-        UUID userId = UUID.randomUUID();
-
-        User user = new User();
-        user.setId(userId);
-        user.setUserName("Fernanda");
-        user.setPersonType("fisica");
-        user.setUserLastName("Mukai dos Santos");
-        user.setIdentification("36216995898");
-        user.setPhone("+5511976110609");
-        user.setEmail("teste@gmail.com");
-        user.setActive(true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        UserDTO userDTO = new UserDTO(user);
+        UserDTO userDTO = new UserDTO(id);
 
         RespDTO respDTO = new RespDTO(HttpStatus.OK, userDTO);
-        when(userService.findUserById(userId)).thenReturn(respDTO);
+        when(userService.createUser(any(User.class))).thenReturn(respDTO);
 
-        mockMvc.perform(get("/api/user/" + userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.httpStatus").value("200 OK"))
-                .andExpect(jsonPath("$.data.user.userName").value("Fernanda"));
+        ResponseEntity<RespDTO> response = userController.createUser(user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(respDTO, response.getBody());
+        assertEquals(userDTO, Objects.requireNonNull(response.getBody()).getData());
     }
 
     @Test
-    public void testUpdateUser() throws Exception {
-        UUID userId = UUID.randomUUID();
-
+    void testCreateUser_IllegalArgumentException() {
         User user = new User();
-//        user.setId(userId);
-        user.setUserName("Fernanda");
-        user.setPersonType("fisica");
-        user.setUserLastName("Mukai dos Santos");
-        user.setIdentification("36216995898");
-        user.setPhone("+5511976110609");
-        user.setEmail("teste@gmail.com");
-        user.setActive(true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        when(userService.createUser(any(User.class)))
+                .thenThrow(new IllegalArgumentException("User with this identification already exists and is active"));
 
-        RespDTO respDTO = new RespDTO(HttpStatus.OK, new UserDTO(user));
-        when(userService.updateUser(any(UUID.class), any(User.class))).thenReturn(respDTO);
+        ResponseEntity<RespDTO> response = userController.createUser(user);
 
-        mockMvc.perform(put("/api/user/" + userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.httpStatus").value("200 OK"))
-                .andExpect(jsonPath("$.data.user.userName").value("Fernanda"));
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals(
+                "User with this identification already exists and is active",
+                Objects.requireNonNull(response.getBody()).getMessage()
+        );
     }
 
-//    @Test
-//    public void testDeleteUser() throws Exception {
-//        UUID userId = UUID.randomUUID();
-//        RespDTO respDTO = new RespDTO(HttpStatus.OK, null);
-//        when(userService.deleteUser(userId)).thenReturn(respDTO);
-//
-//        mockMvc.perform(delete("/api/user/" + userId))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.httpStatus").value("200 OK"));
-//    }
+    @Test
+    void testFindAllUsers_Success() {
+        List<User> users = new ArrayList<>();
+        User user1 = validUser();
+        user1.setId(UUID.randomUUID());
+        User user2 = validUser();
+        user2.setId(UUID.randomUUID());
+        users.add(user1);
+        users.add(user2);
+        UserListDTO usersDTO = UserListDTO.fromUsers(users);
+
+        RespDTO respDTO = new RespDTO(HttpStatus.OK, usersDTO);
+
+        when(userService.findAllUsers()).thenReturn(respDTO);
+
+        ResponseEntity<RespDTO> response = userController.findAllUsers();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(respDTO, response.getBody());
+        assertEquals(usersDTO, Objects.requireNonNull(response.getBody()).getData());
+    }
 
     @Test
-    public void testHandleValidationExceptions() throws Exception {
-        User user = new User();
-        user.setUserName("");
+    void testFindAllUsers_EntityNotFound() {
+        when(userService.findAllUsers()).thenThrow(new EntityNotFoundException("No users found"));
 
-        mockMvc.perform(post("/api/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.httpStatus").value("422 UNPROCESSABLE_ENTITY"));
+        ResponseEntity<RespDTO> response = userController.findAllUsers();
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("No users found", Objects.requireNonNull(response.getBody()).getMessage());
+    }
+
+    @Test
+    void testFindUserById_Success() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+        user.setId(id);
+
+        UserDTO userDTO = new UserDTO(id);
+
+        RespDTO respDTO = new RespDTO(HttpStatus.OK, userDTO);
+
+        when(userService.findUserById(id)).thenReturn(respDTO);
+
+        ResponseEntity<RespDTO> response = userController.findUserById(id);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(respDTO, response.getBody());
+        assertEquals(userDTO, Objects.requireNonNull(response.getBody()).getData());
+    }
+
+    @Test
+    void testFindUserById_EntityNotFound() {
+        UUID id = UUID.randomUUID();
+        when(userService.findUserById(id)).thenThrow(new EntityNotFoundException("No users found"));
+
+        ResponseEntity<RespDTO> response = userController.findUserById(id);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("No users found", Objects.requireNonNull(response.getBody()).getMessage());
+    }
+
+    @Test
+    void testUpdateUser_Success() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+
+        UserDTO userDTO = new UserDTO(id);
+        RespDTO respDTO = new RespDTO(HttpStatus.OK, userDTO);
+
+        when(userService.updateUser(eq(id), any(User.class))).thenReturn(respDTO);
+
+        ResponseEntity<RespDTO> response = userController.updateUser(id, user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(respDTO, response.getBody());
+        assertEquals(userDTO, Objects.requireNonNull(response.getBody()).getData());
+    }
+
+    @Test
+    void testUpdateUser_EntityNotFound() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+        when(userService.updateUser(eq(id), any(User.class))).thenThrow(new EntityNotFoundException("User not found"));
+
+        ResponseEntity<RespDTO> response = userController.updateUser(id, user);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("User not found", Objects.requireNonNull(response.getBody()).getMessage());
+    }
+
+    @Test
+    void testUpdateUser_IllegalArgumentException() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+
+        when(userService.updateUser(eq(id), any(User.class)))
+                .thenThrow(new IllegalArgumentException("It is not possible to change the person type"));
+
+        ResponseEntity<RespDTO> response = userController.updateUser(id, user);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals(
+                "It is not possible to change the person type",
+                Objects.requireNonNull(response.getBody()).getMessage()
+        );
+    }
+
+    @Test
+    void testDeleteUser_Success() {
+        UUID id = UUID.randomUUID();
+        User user = validUser();
+
+        UserDTO userDTO = new UserDTO(user);
+        RespDTO respDTO = new RespDTO(HttpStatus.OK, userDTO);
+        when(userService.deleteUser(id)).thenReturn(respDTO);
+
+        ResponseEntity<RespDTO> response = userController.deleteUser(id);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(respDTO, response.getBody());
+        assertEquals(userDTO, Objects.requireNonNull(response.getBody()).getData());
+    }
+
+    @Test
+    void testDeleteUser_EntityNotFound() {
+        UUID id = UUID.randomUUID();
+        when(userService.deleteUser(id)).thenThrow(new EntityNotFoundException("User not found"));
+
+        ResponseEntity<RespDTO> response = userController.deleteUser(id);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("User not found", Objects.requireNonNull(response.getBody()).getMessage());
+    }
+
+    @Test
+    void testDeleteUser_IllegalArgumentException() {
+        UUID id = UUID.randomUUID();
+        when(userService.deleteUser(id)).thenThrow(new IllegalArgumentException("User is already inactive"));
+
+        ResponseEntity<RespDTO> response = userController.deleteUser(id);
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("User is already inactive", Objects.requireNonNull(response.getBody()).getMessage());
     }
 }

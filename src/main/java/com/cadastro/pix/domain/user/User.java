@@ -24,28 +24,28 @@ public class User {
     private UUID id;
 
     @NotNull
-    @Pattern(regexp = "^(fisica|juridica)$", message = "Tipo de pessoa inválido")
+    @Pattern(regexp = "^(fisica|juridica)$", message = "Invalid person type")
     @Column(name = "person_type", nullable = false, length = 10)
     private String personType;
 
     @NotNull
-    @Size(max = 30, message = "Nome do correntista muito longo")
+    @Size(max = 30, message = "Account holder's name too long")
     @Column(name = "user_name", nullable = false, length = 30)
     private String userName;
 
-    @Size(max = 45, message = "Sobrenome do correntista muito longo")
+    @Size(max = 45, message = "Account holder's last name too long")
     @Column(name = "user_last_name", length = 45)
     private String userLastName;
 
-    @Size(max = 14, message = "Numero da indentificaçao muito longo")
+    @Size(max = 14, message = "Identification number too long")
     @Column(name = "identification", nullable = false, length = 14)
     private String identification;
 
-    @Size(max = 15, message = "Numero de celular muito longo")
+    @Size(max = 15, message = "Phone number too long")
     @Column(name = "phone", nullable = false, length = 14)
     private String phone;
 
-    @Size(max = 77, message = "Email muito longo")
+    @Size(max = 77, message = "Email too long")
     @Column(name = "email", nullable = false, length = 77)
     private String email;
 
@@ -73,7 +73,7 @@ public class User {
     }
 
     @JsonIgnore
-    public boolean isPhysicalPerson() {
+    public boolean isIndividualPerson() {
         return "fisica".equalsIgnoreCase(this.personType);
     }
 

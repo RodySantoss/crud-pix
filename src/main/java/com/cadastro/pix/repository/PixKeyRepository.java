@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface PixKeyRepository extends JpaRepository<PixKey, UUID> {
-    boolean existsByKeyValue(String keyValue);
+    boolean existsByKeyValueAndActive(String keyValue, boolean active);
 
     @Query("SELECT p FROM PixKey p WHERE p.account.user.userName = :userName")
     List<PixKey> findByUserName(@Param("userName") String userName);

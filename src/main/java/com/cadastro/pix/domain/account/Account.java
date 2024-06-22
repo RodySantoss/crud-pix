@@ -2,6 +2,7 @@ package com.cadastro.pix.domain.account;
 
 import com.cadastro.pix.domain.pixKey.PixKey;
 import com.cadastro.pix.domain.user.User;
+import com.cadastro.pix.dto.account.CreateAccountDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -25,19 +26,19 @@ public class Account {
     private UUID id;
 
     @NotNull
-    @Pattern(regexp = "^(corrente|poupança)$", message = "Tipo de conta inválido")
+    @Pattern(regexp = "^(corrente|poupança)$", message = "Invalid account type")
     @Column(name = "account_type", nullable = false, length = 10)
     private String accountType;
 
     @NotNull
-    @Min(value = 1, message = "Número da agência inválido")
-    @Max(value = 9999, message = "Número da agência inválido")
+    @Min(value = 1, message = "Invalid agency number")
+    @Max(value = 9999, message = "Invalid agency number")
     @Column(name = "agency_number", nullable = false)
     private Integer agencyNumber;
 
     @NotNull
-    @Min(value = 1, message = "Número da conta inválido")
-    @Max(value = 99999999, message = "Número da conta inválido")
+    @Min(value = 1, message = "Invalid account number")
+    @Max(value = 99999999, message = "Invalid account number")
     @Column(name = "account_number", nullable = false)
     private Integer accountNumber;
 
@@ -63,6 +64,12 @@ public class Account {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Account(CreateAccountDTO accountDTO) {
+        this.accountType = accountDTO.getAccountType();
+        this.agencyNumber = accountDTO.getAgencyNumber();
+        this.accountNumber = accountDTO.getAccountNumber();
+    }
 
     // Custom methods
     public boolean isActive() {

@@ -2,11 +2,10 @@ package com.cadastro.pix.service;
 
 import com.cadastro.pix.domain.RespDTO;
 import com.cadastro.pix.domain.user.User;
-import com.cadastro.pix.domain.user.dto.UserDTO;
-import com.cadastro.pix.domain.user.dto.UserListDTO;
+import com.cadastro.pix.dto.user.UserDTO;
+import com.cadastro.pix.dto.user.UserListDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.repository.UserRepository;
-import com.cadastro.pix.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,22 +34,7 @@ public class UserServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    private User validUser() {
-        User newUser = new User();
-        newUser.setPersonType("fisica");
-        newUser.setUserName("João");
-        newUser.setUserLastName("Silva");
-        newUser.setPhone("+5511998765432");
-        newUser.setEmail("joao.silva@teste.com");
-        newUser.setIdentification("48428781850");
-        newUser.setActive(true);
-        newUser.setCreatedAt(LocalDateTime.now());
-        newUser.setUpdatedAt(LocalDateTime.now());
-
-        return newUser;
-    }
-
-    private User validPhysicalUserActive() {
+    private User validIndividualUserActive() {
         User newUser = new User();
         newUser.setPersonType("fisica");
         newUser.setUserName("João");
@@ -72,7 +56,7 @@ public class UserServiceTest {
         newUser.setUserLastName("Silva");
         newUser.setPhone("+5511998765432");
         newUser.setEmail("joao.silva@teste.com");
-        newUser.setIdentification("48428781850");
+        newUser.setIdentification("06947283000160");
         newUser.setActive(true);
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setUpdatedAt(LocalDateTime.now());
@@ -85,7 +69,7 @@ public class UserServiceTest {
     public void testCreateUser_ValidUser() {
         UUID id = UUID.randomUUID();
 
-        User newUser = validUser();
+        User newUser = validIndividualUserActive();
 
         newUser.setId(id);
 
@@ -93,10 +77,9 @@ public class UserServiceTest {
 
         RespDTO respDTO = userService.createUser(newUser);
 
-
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
         assertNotNull(respDTO.getData());
-        assertTrue(respDTO.getData() instanceof UserDTO);
+        assertInstanceOf(UserDTO.class, respDTO.getData());
 
         UserDTO userDTO = (UserDTO) respDTO.getData();
         assertEquals(id, userDTO.getId());
@@ -104,176 +87,252 @@ public class UserServiceTest {
 
     @Test
     public void testCreateUser_DuplicateIdentification() {
-        User user = validUser();
-        User duplicatedUser = validUser();
+        User user = validIndividualUserActive();
 
-        // Simulate finding an active user with the same identification
         when(userRepository.findByIdentification(user.getIdentification()))
-                .thenReturn(duplicatedUser); // Return an existing user with the same identification
+                .thenReturn(user);
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("User with this identification already exists and is active", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_NameLengthMoreThen30Char() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
+    public void testCreateUser_DuplicateIdentificationInactive() {
+        User user = validIndividualUserActive();
+        user.setActive(false);
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        when(userRepository.findByIdentification(user.getIdentification()))
+                .thenReturn(user);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("User with this identification already exists but is inactive", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_NullName() {
+        User user = validIndividualUserActive();
+        user.setUserName(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
     }
 
     @Test
     public void testCreateUser_EmptyName() {
-        User user = new User();
-        user.setPersonType("fisica");
+        User user = validIndividualUserActive();
         user.setUserName("");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_NameLengthMoreThen30Char() {
+        User user = validIndividualUserActive();
+        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
     }
 
     @Test
     public void testCreateUser_LastNameMoreThen45Char() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
+        User user = validIndividualUserActive();
         user.setUserLastName("UmSobrenomeComMaisDe45CaracteresQueDeveDarErroNaValidacaoDoSobrenome");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid account holder last name", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_PhoneWithouPlusSignal() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("11998765432"); // Phone number without +
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
+    public void testCreateUser_PhoneWithoutPlusSignal() {
+        User user = validIndividualUserActive();
+        user.setPhone("5511998765432"); // Phone number without +
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
     }
 
     @Test
     public void testCreateUser_PhoneNumberSmallerThenExpected() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+55119987613"); // Phone number without +
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
+        User user = validIndividualUserActive();
+        user.setPhone("+5511987654"); // Phone number smaller
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_InvalidEmail() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("email.invalido"); // Email format invalid
-        user.setIdentification("48428781850");
+    public void testCreateUser_PhoneNumberBiggerThenExpected() {
+        User user = validIndividualUserActive();
+        user.setPhone("+551198765432100"); // Phone number bigger
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_EmailWithoutArroba() {
+        User user = validIndividualUserActive();
+        user.setEmail("email.invalido"); // Email format invalid
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
     public void testCreateUser_InvalidEmailWithouCom() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
+        User user = validIndividualUserActive();
         user.setEmail("email@teste"); // Email format invalid
-        user.setIdentification("48428781850");
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_InvalidCPF() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("12345678901");
+    public void testCreateUser_InvalidEmailBiggerThen77Char() {
+        User user = validIndividualUserActive();
+        user.setEmail("emailaasdadasdassadassasddsadsdadsadsasddsaadsadssdadssdadaaaaasaaas@teste.com");
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_FisicaComCNPJ() {
-        User user = new User();
-        user.setPersonType("fisica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("06947283000160");
+    public void testCreateUser_CPFAlphanumeric() {
+        User user = validIndividualUserActive();
+        user.setIdentification("484287818as");
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(user));
+
+        assertEquals("The CPF must only contain numbers", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_JuridicaWithCPF() {
-        User user = new User();
-        user.setPersonType("juridica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("48428781850");
+    public void testCreateUser_CPFSmaller() {
+        User user = validIndividualUserActive();
+        user.setIdentification("4842878185"); // CPF Smaller
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CPF", exception.getMessage());
     }
 
     @Test
-    public void testCreateUser_IdentificationTooLong() {
-        User user = new User();
-        user.setPersonType("juridica");
-        user.setUserName("João");
-        user.setUserLastName("Silva");
-        user.setPhone("+5511998765432");
-        user.setEmail("joao.silva@teste.com");
-        user.setIdentification("069472830001601");
+    public void testCreateUser_CPFBigger() {
+        User user = validIndividualUserActive();
+        user.setIdentification("484287818501"); // CPF Bigger
 
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CPF", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_IndividualWithCNPJ() {
+        User user = validIndividualUserActive();
+        user.setIdentification("06947283000160"); // CNPJ
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CPF", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_CNPJAlphanumeric() {
+        User user = validLegalUserActive();
+        user.setIdentification("0694728300AS60");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(user));
+
+        assertEquals("The CNPJ must only contain numbers", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_CNPJSmaller() {
+        User user = validLegalUserActive();
+        user.setIdentification("0694728300016"); // CNPJ Smaller
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CNPJ", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_CNPJBigger() {
+        User user = validLegalUserActive();
+        user.setIdentification("069472830001601"); // CNPJ Bigger
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CNPJ", exception.getMessage());
+    }
+
+    @Test
+    public void testCreateUser_LegalWithCPF() {
+        User user = validLegalUserActive();
+        user.setIdentification("48428781850"); // CPF
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.createUser(user);
+        });
+
+        assertEquals("Invalid CNPJ", exception.getMessage());
     }
 
     //UPDATE
     @Test
     public void testUpdateUser_Success() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
         User updatedUser = new User();
@@ -291,33 +350,25 @@ public class UserServiceTest {
         // Simulate saving the updated user
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        RespDTO response = userService.updateUser(userId, updatedUser);
+        RespDTO respDTO = userService.updateUser(userId, updatedUser);
 
-        // Verify the save method is called with the updated user
-        verify(userRepository).save(existingUser);
-
-        // Verify the response
-        assertEquals(HttpStatus.OK, response.getHttpStatus());
-        assertEquals(updatedUser.getUserName(), ((UserDTO) response.getData()).getUserName());
-        assertEquals(updatedUser.getUserLastName(), ((UserDTO) response.getData()).getUserLastName());
-        assertEquals(updatedUser.getPhone(), ((UserDTO) response.getData()).getPhone());
-        assertEquals(updatedUser.getEmail(), ((UserDTO) response.getData()).getEmail());
-        assertEquals(updatedUser.getIdentification(), ((UserDTO) response.getData()).getIdentification());
+        assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
+        assertEquals(updatedUser.getUserName(), ((UserDTO) respDTO.getData()).getUserName());
+        assertEquals(updatedUser.getUserLastName(), ((UserDTO) respDTO.getData()).getUserLastName());
+        assertEquals(updatedUser.getPhone(), ((UserDTO) respDTO.getData()).getPhone());
+        assertEquals(updatedUser.getEmail(), ((UserDTO) respDTO.getData()).getEmail());
+        assertEquals(updatedUser.getIdentification(), ((UserDTO) respDTO.getData()).getIdentification());
+        assertInstanceOf(UserDTO.class, respDTO.getData());
     }
 
     @Test
     public void testUpdateUser_SuccessWithMinimalChange() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User updatedUser = new User();
-        updatedUser.setPersonType("fisica");
-        updatedUser.setUserName("João");
-        updatedUser.setUserLastName("Silva");
+        User updatedUser = validIndividualUserActive();
         updatedUser.setPhone("+5511987654321");
-        updatedUser.setEmail("joao.silva@teste.com");
-        updatedUser.setIdentification("48428781850");
         updatedUser.setActive(true);
 
         // Simulate finding an active user
@@ -326,211 +377,390 @@ public class UserServiceTest {
         // Simulate saving the updated user
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        RespDTO response = userService.updateUser(userId, updatedUser);
+        RespDTO respDTO = userService.updateUser(userId, updatedUser);
 
-        // Verify the save method is called with the updated user
-        verify(userRepository).save(existingUser);
-
-        // Verify the response
-        assertEquals(HttpStatus.OK, response.getHttpStatus());
-        assertEquals(updatedUser.getUserName(), ((UserDTO) response.getData()).getUserName());
-        assertEquals(updatedUser.getUserLastName(), ((UserDTO) response.getData()).getUserLastName());
-        assertEquals(updatedUser.getPhone(), ((UserDTO) response.getData()).getPhone());
-        assertEquals(updatedUser.getEmail(), ((UserDTO) response.getData()).getEmail());
-        assertEquals(updatedUser.getIdentification(), ((UserDTO) response.getData()).getIdentification());
+        // Verify the respDTO
+        assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
+        assertEquals(updatedUser.getUserName(), ((UserDTO) respDTO.getData()).getUserName());
+        assertEquals(updatedUser.getUserLastName(), ((UserDTO) respDTO.getData()).getUserLastName());
+        assertEquals(updatedUser.getPhone(), ((UserDTO) respDTO.getData()).getPhone());
+        assertEquals(updatedUser.getEmail(), ((UserDTO) respDTO.getData()).getEmail());
+        assertEquals(updatedUser.getIdentification(), ((UserDTO) respDTO.getData()).getIdentification());
+        assertInstanceOf(UserDTO.class, respDTO.getData());
     }
-
-//    @Test
-//    public void testUpdateUser_TryToUpdatePersonType() {
-//        UUID userId = UUID.randomUUID();
-//        User existingUser = validPhysicalUserActive();
-//        existingUser.setId(userId);
-//
-//        User updatedUser = new User();
-//        updatedUser.setPersonType("juridica");
-//        updatedUser.setUserName("João");
-//        updatedUser.setUserLastName("Silva");
-//        updatedUser.setPhone("+5511987654321");
-//        updatedUser.setEmail("joao.silva@teste.com");
-//        updatedUser.setIdentification("06947283000160");
-//        updatedUser.setActive(true);
-//
-//        // Simulate finding an active user
-//        when(userRepository.findById(userId)).thenReturn(existingUser);
-//
-//        // Simulate saving the updated user
-//        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
-//
-//        RespDTO response = userService.updateUser(userId, updatedUser);
-//
-//        // Verify the save method is called with the updated user
-//        verify(userRepository).save(existingUser);
-//
-//        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, updatedUser));
-//    }
 
     @Test
     public void testUpdateUser_UserNotFound() {
         UUID userId = UUID.randomUUID();
-        User user = validUser();
-        user.setId(userId);
+        User user = validIndividualUserActive();
 
         // Simulate user not found
         when(userRepository.findById(userId)).thenReturn(null);
 
-        assertThrows(EntityNotFoundException.class, () -> userService.updateUser(userId, user));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_UserInactive() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validUser();
+        User existingUser = validIndividualUserActive();
         existingUser.setActive(false);
 
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
 
         // Simulate finding an inactive user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("User is inactive", exception.getMessage());
     }
 
     @Test
-    public void testUpdateUser_NameLengthMoreThen30Char() {
+    public void testUpdateUser_TryToUpdatePersonType() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
-        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
+        User updatedUser = validIndividualUserActive();
+        updatedUser.setPersonType("juridica");
+
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        // Simulate saving the updated user
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, updatedUser);
+        });
+
+        assertEquals("It is not possible to change the person type", exception.getMessage());
     }
 
     @Test
-    public void testUpdateUser_EmptyName() {
+    public void testUpdateUser_NullName() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
         user.setUserName("");
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_EmptyName() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setUserName("");
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_NameLengthMoreThen30Char() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid account holder name", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_LastNameMoreThen45Char() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
         user.setUserLastName("UmSobrenomeComMaisDe45CaracteresQueDeveDarErroNaValidacaoDoSobrenome");
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid account holder last name", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_PhoneWithoutPlusSignal() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
-        user.setPhone("11998765432"); // Phone number without +
+        User user = validIndividualUserActive();
+        user.setPhone("5511998765432"); // Phone number without +
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_PhoneNumberSmallerThenExpected() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
-        user.setPhone("+55119987613"); // Phone number without +
+        User user = validIndividualUserActive();
+        user.setPhone("+5511987654"); // Phone smaller
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_PhoneNumberBiggerThenExpected() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setPhone("+551198765432100"); // Phone bigger
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid phone format", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_EmailWithoutArroba() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
         user.setEmail("email.invalido"); // Email format invalid
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
     public void testUpdateUser_EmailWithoutDotCom() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
         user.setEmail("email@teste"); // Email format invalid
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testUpdateUser_InvalidCPF() {
+    public void testUpdateUser_EmailBiggerThen77Char() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
-        user.setIdentification("12345678901"); // Invalid CPF
+        User user = validIndividualUserActive();
+        user.setEmail("emailaasdadasdassadassasddsadsdadsadsasddsaadsadssdadssdadaaaaasaaas@teste.com");
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(userId, user);
+        });
+
+        assertEquals("Invalid email format", exception.getMessage());
     }
 
     @Test
-    public void testUpdateUser_FisicaComCNPJ() {
+    public void testUpdateUser_CPFAlphanumeric() {
         UUID userId = UUID.randomUUID();
-        User existingUser = validPhysicalUserActive();
+        User existingUser = validIndividualUserActive();
         existingUser.setId(userId);
 
-        User user = validPhysicalUserActive();
-        user.setIdentification("06947283000160"); // Invalid CPF
+        User user = validIndividualUserActive();
+        user.setIdentification("484287818as"); // Invalid CPF
 
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("The CPF must only contain numbers", exception.getMessage());
     }
 
     @Test
-    public void testUpdateUser_JuridicaComCPF() {
+    public void testUpdateUser_CPFSmaller() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setIdentification("4842878185"); // Invalid CPF
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("Invalid CPF", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_CPFBigger() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setIdentification("484287818501"); // Invalid CPF
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("Invalid CPF", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_IndividualComCNPJ() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validIndividualUserActive();
+        existingUser.setId(userId);
+
+        User user = validIndividualUserActive();
+        user.setIdentification("06947283000160"); // CNPJ
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("Invalid CPF", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_CNPJAlphanumeric() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validLegalUserActive();
+        existingUser.setId(userId);
+
+        User user = validLegalUserActive();
+        user.setIdentification("069472830asd60"); // Invalid CNPJ
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("The CNPJ must only contain numbers", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_CNPJSmaller() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validLegalUserActive();
+        existingUser.setId(userId);
+
+        User user = validLegalUserActive();
+        user.setIdentification("0694728300016"); // Invalid CNPJ
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("Invalid CNPJ", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_CNPJBigger() {
+        UUID userId = UUID.randomUUID();
+        User existingUser = validLegalUserActive();
+        existingUser.setId(userId);
+
+        User user = validLegalUserActive();
+        user.setIdentification("069472830001601"); // Invalid CNPJ
+
+        // Simulate finding an active user
+        when(userRepository.findById(userId)).thenReturn(existingUser);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
+
+        assertEquals("Invalid CNPJ", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateUser_LegalWithCPF() {
         UUID userId = UUID.randomUUID();
         User existingUser = validLegalUserActive();
         existingUser.setId(userId);
@@ -541,88 +771,89 @@ public class UserServiceTest {
         // Simulate finding an active user
         when(userRepository.findById(userId)).thenReturn(existingUser);
 
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(userId, user));
-    }
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.updateUser(userId, user));
 
-    @Test
-    public void testUpdateUser_IdentificationTooLong() {
-        UUID userId = UUID.randomUUID();
-        User existingUser = validLegalUserActive();
-        existingUser.setId(userId);
-
-        User user = validLegalUserActive();
-        user.setIdentification("069472830001601");
-
-        // Testa se a exceção correta é lançada
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user));
+        assertEquals("Invalid CNPJ", exception.getMessage());
     }
 
     //GET
     @Test
-    void testFindAllUsers() {
+    void testFindAllUsers_Success() {
         List<User> users = new ArrayList<>();
-        User user1 = validPhysicalUserActive();
+        User user1 = validIndividualUserActive();
         user1.setId(UUID.randomUUID());
-        User user2 = validPhysicalUserActive();
+        User user2 = validIndividualUserActive();
         user2.setId(UUID.randomUUID());
         users.add(user1);
         users.add(user2);
         when(userRepository.findAll()).thenReturn(users);
 
-        RespDTO response = userService.findAllUsers();
+        RespDTO respDTO = userService.findAllUsers();
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getHttpStatus());
-        assertTrue(response.getData() instanceof UserListDTO);
-        assertEquals(2, ((UserListDTO) response.getData()).getUsers().size());
-        verify(userRepository, times(1)).findAll();
+        assertNotNull(respDTO);
+        assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
+        assertEquals(2, ((UserListDTO) respDTO.getData()).getUsers().size());
+        assertInstanceOf(UserListDTO.class, respDTO.getData());
     }
 
-//    @Test
-//    void testFindUserById_Success() {
-//        UUID userId = UUID.randomUUID();
-//        User user = validPhysicalUserActive();
-//        user.setId(userId);
-//
-//        when(userRepository.findById(userId)).thenReturn(user);
-//
-//        RespDTO response = userService.findUserById(userId);
-//
-//        assertNotNull(response);
-//        assertEquals(HttpStatus.OK, response.getHttpStatus());
-//        assertTrue(response.getData() instanceof UserDTO);
-//        assertEquals(userId, ((UserDTO) response.getData()).getId());
-//        verify(userRepository, times(1)).findById(userId);
-//    }
+    @Test
+    void testFindAllUsers_NotFound() {
+        List<User> users = new ArrayList<>();
+
+        when(userRepository.findAll()).thenReturn(users);
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
+                userService.findAllUsers());
+
+        assertEquals("No users found", exception.getMessage());
+
+    }
+
+    @Test
+    void testFindUserById_Success() {
+        UUID userId = UUID.randomUUID();
+        User user = validIndividualUserActive();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(user);
+
+        RespDTO respDTO = userService.findUserById(userId);
+
+        assertNotNull(respDTO);
+        assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
+        assertEquals(userId, ((UserDTO) respDTO.getData()).getId());
+        verify(userRepository, times(1)).findById(userId);
+        assertInstanceOf(UserDTO.class, respDTO.getData());
+    }
 
     @Test
     void testFindUserById_NotFound() {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(null);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> userService.findUserById(userId));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
+                userService.findUserById(userId));
 
-        assertEquals("Conta nao encontrada", exception.getMessage());
-        verify(userRepository, times(1)).findById(userId);
+        assertEquals("User not found", exception.getMessage());
     }
-    //DELETE
-//    @Test
-//    void testDeleteUser_Success() {
-//        UUID userId = UUID.randomUUID();
-//        User user = validPhysicalUserActive();
-//        user.setId(userId);
-//
-//        when(userRepository.findById(userId)).thenReturn(user);
-//
-//        RespDTO response = userService.deleteUser(userId);
-//
-//        assertNotNull(response);
-//        assertEquals(HttpStatus.OK, response.getHttpStatus());
-//        assertTrue(response.getData() instanceof UserDTO);
-//        assertFalse(((UserDTO) response.getData()).getActive());
-//        verify(userRepository, times(1)).findById(userId);
-//        verify(userRepository, times(1)).save(user);
-//    }
+
+    // DELETE
+    @Test
+    void testDeleteUser_Success() {
+        UUID userId = UUID.randomUUID();
+        User user = validIndividualUserActive();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(user);
+
+        RespDTO respDTO = userService.deleteUser(userId);
+
+        assertNotNull(respDTO);
+        assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
+        assertInstanceOf(UserDTO.class, respDTO.getData());
+        assertFalse(((UserDTO) respDTO.getData()).getActive());
+    }
 
     @Test
     void testDeleteUser_NotFound() {
@@ -631,21 +862,21 @@ public class UserServiceTest {
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> userService.deleteUser(userId));
 
-        assertEquals("User nao encontrado", exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
         verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
     void testDeleteUser_AlreadyInactive() {
         UUID userId = UUID.randomUUID();
-        User user = validPhysicalUserActive();
+        User user = validIndividualUserActive();
         user.setId(userId);
         user.setActive(false);
         when(userRepository.findById(userId)).thenReturn(user);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(userId));
 
-        assertEquals("User ja esta inativo", exception.getMessage());
+        assertEquals("User is already inactive", exception.getMessage());
         verify(userRepository, times(1)).findById(userId);
     }
 }
