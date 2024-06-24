@@ -22,118 +22,48 @@ import java.util.UUID;
 @Validated
 public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
 
     @PostMapping
     public ResponseEntity<RespDTO> createUser(@Valid @RequestBody User user) {
-        log.info("Request to create user received: {}", user);
-        try {
-            RespDTO respDTO = userService.createUser(user);
-            log.info("User created successfully: {}", respDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
-        } catch (IllegalArgumentException e) {
-            log.error("IllegalArgumentException while creating user: {}", e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+        logger.info("Request to create user received: {}", user);
+        RespDTO respDTO = userService.createUser(user);
+        logger.info("User created successfully: {}", respDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(respDTO);
     }
 
     @GetMapping
     public ResponseEntity<RespDTO> findAllUsers() {
-        log.info("Request to find all users received");
-        try {
-            RespDTO respDTO = userService.findAllUsers();
-            log.info("Users retrieved successfully: {}", respDTO);
-            return ResponseEntity.ok(respDTO);
-        } catch (EntityNotFoundException e) {
-            log.error("EntityNotFoundException while finding all users: {}", e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.NOT_FOUND,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
-        }
+        logger.info("Request to find all users received");
+        RespDTO respDTO = userService.findAllUsers();
+        logger.info("Users retrieved successfully: {}", respDTO);
+        return ResponseEntity.ok(respDTO);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RespDTO> findUserById(@PathVariable UUID id) {
-        log.info("Request to find user by id received: {}", id);
-        try {
-            RespDTO respDTO = userService.findUserById(id);
-            log.info("User retrieved successfully for id {}: {}", id, respDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
-        } catch (EntityNotFoundException e) {
-            log.error("EntityNotFoundException while finding user by id {}: {}", id, e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.NOT_FOUND,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
-        }
+        logger.info("Request to find user by id received: {}", id);
+        RespDTO respDTO = userService.findUserById(id);
+        logger.info("User retrieved successfully for id {}: {}", id, respDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(respDTO);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<RespDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody User user) {
-        log.info("Request to update user received for id {}: {}", id, user);
-        try {
-            RespDTO respDTO = userService.updateUser(id, user);
-            log.info("User updated successfully for id {}: {}", id, respDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
-        } catch (EntityNotFoundException e) {
-            log.error("EntityNotFoundException while updating user for id {}: {}", id, e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.NOT_FOUND,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
-        } catch (IllegalArgumentException e) {
-            log.error("IllegalArgumentException while updating user for id {}: {}", id, e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+        logger.info("Request to update user received for id {}: {}", id, user);
+        RespDTO respDTO = userService.updateUser(id, user);
+        logger.info("User updated successfully for id {}: {}", id, respDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(respDTO);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<RespDTO> deleteUser(@PathVariable UUID id) {
-        log.info("Request to delete user received for id {}", id);
-        try {
-            RespDTO respDTO = userService.deleteUser(id);
-            log.info("User deleted successfully for id {}: {}", id, respDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(respDTO);
-        } catch (EntityNotFoundException e) {
-            log.error("EntityNotFoundException while deleting user for id {}: {}", id, e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.NOT_FOUND,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.NOT_FOUND);
-        } catch (IllegalArgumentException e) {
-            log.error("IllegalArgumentException while deleting user for id {}: {}", id, e.getMessage());
-            RespDTO respDTO = new RespDTO(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    e.getMessage()
-            );
-            return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RespDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        FieldError error = (FieldError) ex.getBindingResult().getAllErrors().get(0);
-        log.error("Validation error: {}", error.getDefaultMessage());
-        RespDTO respDTO = new RespDTO(
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                error.getDefaultMessage()
-        );
-        return new ResponseEntity<>(respDTO, HttpStatus.UNPROCESSABLE_ENTITY);
+        logger.info("Request to delete user received for id {}", id);
+        RespDTO respDTO = userService.deleteUser(id);
+        logger.info("User deleted successfully for id {}: {}", id, respDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(respDTO);
     }
 }
