@@ -174,9 +174,16 @@ public class Validate {
         logger.info("Validating PixKey creation for key: {}", pixKey);
         String keyValue = pixKey.getKeyValue();
         validateExistPixKey(keyValue);
+        if (user.isIndividualPerson() && pixKeyList.size() >= 5) {
+            logger.error("Limit of 5 keys per account for Individuals exceeded");
+            throw new IllegalArgumentException("Limit of 5 keys per account for Individuals exceeded");
+        } else if (pixKeyList.size() >= 20) {
+            logger.error("Limit of 20 keys per account for Legal Entities exceeded");
+            throw new IllegalArgumentException("Limit of 20 keys per account for Legal Entities exceeded");
+        }
 
         switch (pixKey.getKeyType().toLowerCase()) {
-            case "phone":
+            case "celular":
                 validatePhone(keyValue);
                 break;
             case "email":
@@ -218,10 +225,6 @@ public class Validate {
             logger.error("The CPF key must be the same as the account's CPF: {}", keyValue);
             throw new IllegalArgumentException("The CPF key must be the same as the account's CPF");
         }
-        if (pixKeyList.size() >= 5) {
-            logger.error("Limit of 5 keys per account for Individuals exceeded");
-            throw new IllegalArgumentException("Limit of 5 keys per account for Individuals exceeded");
-        }
 
         for (PixKey pixKey : pixKeyList) {
             if (pixKey.getKeyType().equalsIgnoreCase("cpf")) {
@@ -244,11 +247,6 @@ public class Validate {
         if (!account.getUser().getIdentification().equals(keyValue)) {
             logger.error("The CNPJ key must be the same as the account's CNPJ: {}", keyValue);
             throw new IllegalArgumentException("The CNPJ key must be the same as the account's CNPJ");
-        }
-
-        if (pixKeyList.size() >= 20) {
-            logger.error("Limit of 20 keys per account for Legal Entities exceeded");
-            throw new IllegalArgumentException("Limit of 20 keys per account for Legal Entities exceeded");
         }
 
         for (PixKey pixKey : pixKeyList) {
