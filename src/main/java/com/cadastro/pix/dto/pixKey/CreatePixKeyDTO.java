@@ -14,20 +14,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreatePixKeyDTO {
 
-    @NotNull
+    @NotNull(message = "keyType must not be null")
     @Column(name = "key_type", nullable = false, length = 9)
     private String keyType;
 
-    @NotNull
+    @NotNull(message = "keyValue must not be null")
     @Column(name = "key_value", nullable = false, length = 77)
     private String keyValue;
 
-    @NotNull
+    @NotNull(message = "agencyNumber must not be null")
     @Min(value = 1, message = "Invalid agency number")
     @Max(value = 9999, message = "Invalid agency number")
     private Integer agencyNumber;
 
-    @NotNull
+    @NotNull(message = "accountNumber must not be null")
     @Min(value = 1, message = "Invalid account number")
     @Max(value = 99999999, message = "Invalid account number")
     private Integer accountNumber;
