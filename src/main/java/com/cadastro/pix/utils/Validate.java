@@ -45,7 +45,7 @@ public class Validate {
         validateUser(user);
     }
 
-    public void validateUser(User user) {
+    private void validateUser(User user) {
         validateNomeCorrentista(user.getUserName());
         validateSobrenomeCorrentista(user.getUserLastName());
         validateCelular(user.getPhone());
@@ -53,7 +53,7 @@ public class Validate {
         validateIdentificacao(user);
     }
 
-    public void validateExistUser(User user) {
+    private void validateExistUser(User user) {
         logger.info("Checking if user exists: {}", user);
 
         User existUser = userRepository.findByIdentification(user.getIdentification());
@@ -68,7 +68,25 @@ public class Validate {
         }
     }
 
-    public void validateUserType(String existingUserType, String newUserType) {
+    private void validateNomeCorrentista(String nome) {
+        logger.info("Validating account holder name: {}", nome);
+
+        if (nome == null || nome.isEmpty() || nome.length() > 30) {
+            logger.error("Invalid account holder name: {}", nome);
+            throw new IllegalArgumentException("Invalid account holder name");
+        }
+    }
+
+    private void validateSobrenomeCorrentista(String sobrenome) {
+        logger.info("Validating account holder last name: {}", sobrenome);
+
+        if (sobrenome.length() > 45) {
+            logger.error("Invalid account holder last name: {}", sobrenome);
+            throw new IllegalArgumentException("Invalid account holder last name");
+        }
+    }
+
+    private void validateUserType(String existingUserType, String newUserType) {
         logger.info("Validating user type. Existing: {}, New: {}", existingUserType, newUserType);
 
         if (!existingUserType.equals(newUserType)) {
@@ -77,7 +95,7 @@ public class Validate {
         }
     }
 
-    public void validateIdentificacao(User user) {
+    private void validateIdentificacao(User user) {
         logger.info("Validating user identification: {}", user.getIdentification());
 
         if (user.isIndividualPerson()) {
@@ -90,6 +108,8 @@ public class Validate {
         }
     }
 
+    //ACCOUNT
+
     public void validateCreateAccount(Account account) {
         // Lógica de validação
         logger.info("Validating account creation fields for account: {}", account);
@@ -98,44 +118,40 @@ public class Validate {
         logger.info("Account creation fields validated successfully");
     }
 
-    //ACCOUNT
-//    public void validateCreateAccount(Account account) {
-//    }
-
     public void validateUpdateAccount(Account account) {
         logger.info("Validating account update fields for account: {}", account);
         validateAccount(account);
         logger.info("Account update fields validated successfully");
     }
 
-    public void validateAccount(Account account) {
+    private void validateAccount(Account account) {
         validateAccountType(account.getAccountType());
         validateAgencyNumber(account.getAgencyNumber());
         validateAccountNumber(account.getAccountNumber());
     }
 
-    public void validateAccountType(String tipoConta) {
+    private void validateAccountType(String tipoConta) {
         if (!tipoConta.equalsIgnoreCase("corrente") && !tipoConta.equalsIgnoreCase("poupança")) {
             logger.error("Invalid account type: {}", tipoConta);
             throw new IllegalArgumentException("Invalid account type");
         }
     }
 
-    public void validateAgencyNumber(Integer numeroAgencia) {
+    private void validateAgencyNumber(Integer numeroAgencia) {
         if (numeroAgencia == null || numeroAgencia.toString().length() > 4) {
             logger.error("Invalid agency number: {}", numeroAgencia);
             throw new IllegalArgumentException("Invalid agency number");
         }
     }
 
-    public void validateAccountNumber(Integer numeroConta) {
+    private void validateAccountNumber(Integer numeroConta) {
         if (numeroConta == null || numeroConta.toString().length() > 8) {
             logger.error("Invalid account number: {}", numeroConta);
             throw new IllegalArgumentException("Invalid account number");
         }
     }
 
-    public void validateExistAccount(Account account) {
+    private void validateExistAccount(Account account) {
         logger.info("Checking if account already exists: {}", account);
         Account existAccount = accountRepository.findByAgencyNumberAndAccountNumber(
                 account.getAgencyNumber(), account.getAccountNumber()
@@ -170,10 +186,6 @@ public class Validate {
                 validateCPFKey(user, keyValue, pixKeyList, account);
                 break;
             case "cnpj":
-                if (user.isIndividualPerson()) {
-                    logger.error("Individuals cannot register a CNPJ key");
-                    throw new IllegalArgumentException("Individuals cannot register a CNPJ key");
-                }
                 validateCNPJKey(user, keyValue, pixKeyList, account);
                 break;
             case "aleatorio":
@@ -185,7 +197,7 @@ public class Validate {
         }
     }
 
-    public void validateExistPixKey(String keyValue) {
+    private void validateExistPixKey(String keyValue) {
         logger.info("Checking if pix key exists: {}", keyValue);
 
         if (pixKeyRepository.existsByKeyValueAndActive(keyValue, true)) {
@@ -194,7 +206,7 @@ public class Validate {
         }
     }
 
-    public void validateCPFKey(User user, String keyValue, List<PixKey> pixKeyList, Account account) {
+    private void validateCPFKey(User user, String keyValue, List<PixKey> pixKeyList, Account account) {
         logger.info("Validating CPF key: {}", keyValue);
 
         if (user.isLegalPerson()) {
@@ -205,6 +217,10 @@ public class Validate {
         if (!account.getUser().getIdentification().equals(keyValue)) {
             logger.error("The CPF key must be the same as the account's CPF: {}", keyValue);
             throw new IllegalArgumentException("The CPF key must be the same as the account's CPF");
+        }
+        if (pixKeyList.size() >= 5) {
+            logger.error("Limit of 5 keys per account for Individuals exceeded");
+            throw new IllegalArgumentException("Limit of 5 keys per account for Individuals exceeded");
         }
 
         for (PixKey pixKey : pixKeyList) {
@@ -217,7 +233,7 @@ public class Validate {
         validateCPF(keyValue);
     }
 
-    public void validateCNPJKey(User user, String keyValue, List<PixKey> pixKeyList, Account account) {
+    private void validateCNPJKey(User user, String keyValue, List<PixKey> pixKeyList, Account account) {
         logger.info("Validating CNPJ key: {}", keyValue);
 
         if (user.isIndividualPerson()) {
@@ -228,6 +244,11 @@ public class Validate {
         if (!account.getUser().getIdentification().equals(keyValue)) {
             logger.error("The CNPJ key must be the same as the account's CNPJ: {}", keyValue);
             throw new IllegalArgumentException("The CNPJ key must be the same as the account's CNPJ");
+        }
+
+        if (pixKeyList.size() >= 20) {
+            logger.error("Limit of 20 keys per account for Legal Entities exceeded");
+            throw new IllegalArgumentException("Limit of 20 keys per account for Legal Entities exceeded");
         }
 
         for (PixKey pixKey : pixKeyList) {
@@ -242,25 +263,8 @@ public class Validate {
 
 
     //GENERAL
-    public void validateNomeCorrentista(String nome) {
-        logger.info("Validating account holder name: {}", nome);
 
-        if (nome == null || nome.isEmpty() || nome.length() > 30) {
-            logger.error("Invalid account holder name: {}", nome);
-            throw new IllegalArgumentException("Invalid account holder name");
-        }
-    }
-
-    public void validateSobrenomeCorrentista(String sobrenome) {
-        logger.info("Validating account holder last name: {}", sobrenome);
-
-        if (sobrenome.length() > 45) {
-            logger.error("Invalid account holder last name: {}", sobrenome);
-            throw new IllegalArgumentException("Invalid account holder last name");
-        }
-    }
-
-    public void validateCelular(String keyValue) {
+    private void validateCelular(String keyValue) {
         logger.info("Validating phone number: {}", keyValue);
 
         if (!keyValue.matches("^\\+\\d{1,2}\\d{1,3}\\d{9}$")) {
@@ -269,7 +273,7 @@ public class Validate {
         }
     }
 
-    public void validateEmail(String keyValue) {
+    private void validateEmail(String keyValue) {
         logger.info("Validating email address: {}", keyValue);
 
         // has to be at least in format string@string.com
@@ -284,7 +288,7 @@ public class Validate {
         }
     }
 
-    public void validateCPF(String keyValue) {
+    private void validateCPF(String keyValue) {
         logger.info("Validating CPF: {}", keyValue);
 
         if (!isNumeric(keyValue)) {
@@ -321,7 +325,7 @@ public class Validate {
         }
     }
 
-    public void validateCNPJ(String keyValue) {
+    private void validateCNPJ(String keyValue) {
         logger.info("Validating CNPJ: {}", keyValue);
 
         if (!isNumeric(keyValue)) {
@@ -360,7 +364,7 @@ public class Validate {
         }
     }
 
-    public void validateRandomKey(String keyValue) {
+    private void validateRandomKey(String keyValue) {
         logger.info("Validating random key: {}", keyValue);
         if (!keyValue.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[4][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")) {
             logger.error("Invalid random key: {}", keyValue);
@@ -368,7 +372,7 @@ public class Validate {
         }
     }
 
-    public boolean isNumeric(String str) {
+    private boolean isNumeric(String str) {
         if (str == null) {
             return false;
         }

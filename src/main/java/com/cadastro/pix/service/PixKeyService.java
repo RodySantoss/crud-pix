@@ -62,14 +62,6 @@ public class PixKeyService {
 
         validate.validateCreatePixKey(pixKey, pixKeyList, account, user);
 
-        if (user.isIndividualPerson() && pixKeyListSize >= 5) {
-            logger.error("Limit of 5 keys per account for Individuals exceeded");
-            throw new IllegalArgumentException("Limit of 5 keys per account for Individuals exceeded");
-        } else if (user.isLegalPerson() && pixKeyListSize >= 20) {
-            logger.error("Limit of 20 keys per account for Legal Entities exceeded");
-            throw new IllegalArgumentException("Limit of 20 keys per account for Legal Entities exceeded");
-        }
-
         pixKey.setActive(true); // Por padrão, nova chave PIX é ativa
         pixKey.setAccount(account);
 
