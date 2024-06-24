@@ -11,12 +11,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyListWithAccountAndUserDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyWithAccountDTO;
-import com.cadastro.pix.dto.user.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,7 +1,7 @@
 package com.cadastro.pix.service;
 
 import com.cadastro.pix.controller.UserController;
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.dto.user.UserDTO;
 import com.cadastro.pix.dto.user.UserListDTO;

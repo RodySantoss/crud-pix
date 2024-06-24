@@ -1,4 +1,4 @@
-package com.cadastro.pix.domain;
+package com.cadastro.pix.dto.resp;
 
 
 import com.cadastro.pix.interfaces.BaseDTO;

@@ -1,11 +1,9 @@
 package com.cadastro.pix.controller;
 
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.domain.account.Account;
 import com.cadastro.pix.domain.pixKey.PixKey;
 import com.cadastro.pix.domain.user.User;
-import com.cadastro.pix.dto.account.CreateAccountDTO;
-import com.cadastro.pix.dto.account.SimpleAccountListWithUserDTO;
 import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyListWithAccountAndUserDTO;

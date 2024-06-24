@@ -1,6 +1,6 @@
 package com.cadastro.pix.controller;
 
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.dto.user.UserDTO;
 import com.cadastro.pix.dto.user.UserListDTO;
@@ -13,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

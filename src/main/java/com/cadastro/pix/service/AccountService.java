@@ -1,11 +1,11 @@
 package com.cadastro.pix.service;
 
-import com.cadastro.pix.domain.*;
 import com.cadastro.pix.domain.account.Account;
 import com.cadastro.pix.dto.account.CreateAccountDTO;
 import com.cadastro.pix.dto.account.SimpleAccountListWithUserDTO;
 import com.cadastro.pix.dto.account.SimpleAccountWithUserDTO;
 import com.cadastro.pix.domain.user.User;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.UserRepository;

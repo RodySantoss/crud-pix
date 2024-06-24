@@ -1,7 +1,7 @@
 package com.cadastro.pix.controller;
 
 import com.cadastro.pix.domain.account.Account;
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.dto.account.CreateAccountDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.service.AccountService;
@@ -16,7 +16,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

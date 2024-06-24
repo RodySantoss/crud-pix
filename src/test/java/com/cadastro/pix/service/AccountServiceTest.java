@@ -3,7 +3,7 @@ package com.cadastro.pix.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.domain.account.Account;
 import com.cadastro.pix.dto.account.CreateAccountDTO;
 import com.cadastro.pix.dto.account.SimpleAccountListWithUserDTO;

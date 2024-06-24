@@ -4,7 +4,7 @@ import com.cadastro.pix.dto.account.SimpleAccountListWithUserDTO;
 import com.cadastro.pix.dto.account.SimpleAccountWithPixDTO;
 import com.cadastro.pix.dto.account.SimpleAccountWithUserDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyDTO;
-import com.cadastro.pix.domain.RespDTO ;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyListWithAccountAndUserDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyWithAccountDTO;
 import com.cadastro.pix.dto.user.UserDTO;

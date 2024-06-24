@@ -1,6 +1,6 @@
 package com.cadastro.pix.controller;
 
-import com.cadastro.pix.domain.RespDTO;
+import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.service.PixKeyService;
