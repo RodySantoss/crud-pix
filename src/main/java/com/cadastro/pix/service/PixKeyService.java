@@ -58,7 +58,6 @@ public class PixKeyService {
         PixKey pixKey = new PixKey(createPixKeyDTO);
 
         List<PixKey> pixKeyList = account.getPixKeys();
-        int pixKeyListSize = pixKeyList.size();
 
         validate.validateCreatePixKey(pixKey, pixKeyList, account, user);
 

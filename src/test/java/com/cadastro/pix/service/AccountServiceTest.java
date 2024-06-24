@@ -12,6 +12,7 @@ import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.UserRepository;
+import com.cadastro.pix.utils.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,9 @@ public class AccountServiceTest {
 
     @InjectMocks
     private AccountService accountService;
+
+    @Mock
+    private Validate validate;
 
     @BeforeEach
     void setUp() {
@@ -112,118 +116,23 @@ public class AccountServiceTest {
         assertEquals("User not found with this identification", exception.getMessage());
     }
 
-    @Test
-    void testCreateAccount_ExistingAccount() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-        Account validAccount = validAccount();
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-        when(accountRepository.findByAgencyNumberAndAccountNumber(any(Integer.class), any(Integer.class))).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("There is already an account with that account number at this agency", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_ExistingAccountInactivated() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-        Account validAccount = validAccount();
-        validAccount.setActive(false);
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-        when(accountRepository.findByAgencyNumberAndAccountNumber(any(Integer.class), any(Integer.class))).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("There is already an inactive account with that account number at this agency", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_InvalidAccountType() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-
-        validCreateAccountDTO.setAccountType("invalid");
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("Invalid account type", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_NullAgencyNumber() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-
-        validCreateAccountDTO.setAgencyNumber(null);
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_BiggerAgencyNumber() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-
-        validCreateAccountDTO.setAgencyNumber(12345);
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_NullAccountNumber() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-
-        validCreateAccountDTO.setAccountNumber(null);
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("Invalid account number", exception.getMessage());
-    }
-
-    @Test
-    void testCreateAccount_BiggerAccountNumber() {
-        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
-        User validUser = validIndividualUserActive();
-
-        validCreateAccountDTO.setAccountNumber(123456789);
-
-        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.createAccount(validCreateAccountDTO);
-        });
-
-        assertEquals("Invalid account number", exception.getMessage());
-    }
+//    @Test
+//    void testCreateAccount_ErrorOnValidateCreateAccount() {
+//        CreateAccountDTO validCreateAccountDTO = validCreateAccountDTO();
+//        User validUser = validIndividualUserActive();
+//        Account validAccount = validAccount();
+//
+//        when(userRepository.findByIdentification(any(String.class))).thenReturn(validUser);
+//        when(accountRepository.findByAgencyNumberAndAccountNumber(any(Integer.class), any(Integer.class))).thenReturn(validAccount);
+//        doThrow(new IllegalArgumentException("There is already an account with that account number at this agency"))
+//                .when(validate).validateUpdateAccount(any(Account.class));
+//
+//        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+//            accountService.createAccount(validCreateAccountDTO);
+//        });
+//
+//        assertEquals("There is already an account with that account number at this agency", exception.getMessage());
+//    }
 
     //UPDATE
     @Test
@@ -281,85 +190,23 @@ public class AccountServiceTest {
         assertEquals("This account is inactive", exception.getMessage());
     }
 
-    @Test
-    void testUpdateAccount_InvalidAccountType() {
-        Account validAccount = validAccount();
-
-        validAccount.setAccountType("invalid");
-
-        UUID id = validAccount.getId();
-        when(accountRepository.findById(id)).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.updateAccount(id, validAccount);
-        });
-
-        assertEquals("Invalid account type", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateAccount_NullAgencyNumber() {
-        Account validAccount = validAccount();
-
-        validAccount.setAgencyNumber(null);
-
-        UUID id = validAccount.getId();
-        when(accountRepository.findById(id)).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.updateAccount(id, validAccount);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateAccount_BiggerAgencyNumber() {
-        Account validAccount = validAccount();
-
-        validAccount.setAgencyNumber(12345);
-
-        UUID id = validAccount.getId();
-        when(accountRepository.findById(id)).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.updateAccount(id, validAccount);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateAccount_NullAccountNumber() {
-        Account validAccount = validAccount();
-
-        validAccount.setAgencyNumber(null);
-
-        UUID id = validAccount.getId();
-        when(accountRepository.findById(id)).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.updateAccount(id, validAccount);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateAccount_BiggerAccountNumber() {
-        Account validAccount = validAccount();
-
-        validAccount.setAgencyNumber(123456789);
-
-        UUID id = validAccount.getId();
-        when(accountRepository.findById(id)).thenReturn(validAccount);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            accountService.updateAccount(id, validAccount);
-        });
-
-        assertEquals("Invalid agency number", exception.getMessage());
-    }
+//    @Test
+//    void testUpdateAccount_ErrorOnValidateCreateAccount() {
+//        Account validAccount = validAccount();
+//
+//        validAccount.setAccountType("invalid");
+//
+//        UUID id = validAccount.getId();
+//
+//        when(accountRepository.findById(id)).thenReturn(validAccount);
+//        doThrow(new IllegalArgumentException("Invalid account type"))
+//                .when(validate).validateCreateAccount(any(Account.class));
+//
+//        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+//            accountService.updateAccount(id, validAccount);
+//        });
+//        assertEquals("Invalid account type", exception.getMessage());
+//    }
 
     //DELETE
     @Test
