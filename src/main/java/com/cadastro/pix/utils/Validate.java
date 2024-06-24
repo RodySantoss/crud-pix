@@ -46,11 +46,11 @@ public class Validate {
     }
 
     private void validateUser(User user) {
-        validateNomeCorrentista(user.getUserName());
-        validateSobrenomeCorrentista(user.getUserLastName());
-        validateCelular(user.getPhone());
+        validateUserName(user.getUserName());
+        validateUserLastName(user.getUserLastName());
+        validatePhone(user.getPhone());
         validateEmail(user.getEmail());
-        validateIdentificacao(user);
+        validateIdentification(user);
     }
 
     private void validateExistUser(User user) {
@@ -68,21 +68,21 @@ public class Validate {
         }
     }
 
-    private void validateNomeCorrentista(String nome) {
-        logger.info("Validating account holder name: {}", nome);
+    private void validateUserName(String nome) {
+        logger.info("Validating user name: {}", nome);
 
         if (nome == null || nome.isEmpty() || nome.length() > 30) {
-            logger.error("Invalid account holder name: {}", nome);
-            throw new IllegalArgumentException("Invalid account holder name");
+            logger.error("Invalid user name: {}", nome);
+            throw new IllegalArgumentException("Invalid user name");
         }
     }
 
-    private void validateSobrenomeCorrentista(String sobrenome) {
-        logger.info("Validating account holder last name: {}", sobrenome);
+    private void validateUserLastName(String sobrenome) {
+        logger.info("Validating user last name: {}", sobrenome);
 
-        if (sobrenome.length() > 45) {
-            logger.error("Invalid account holder last name: {}", sobrenome);
-            throw new IllegalArgumentException("Invalid account holder last name");
+        if (sobrenome!= null && sobrenome.length() > 45) {
+            logger.error("Invalid user last name: {}", sobrenome);
+            throw new IllegalArgumentException("Invalid user last name");
         }
     }
 
@@ -95,7 +95,7 @@ public class Validate {
         }
     }
 
-    private void validateIdentificacao(User user) {
+    private void validateIdentification(User user) {
         logger.info("Validating user identification: {}", user.getIdentification());
 
         if (user.isIndividualPerson()) {
@@ -176,8 +176,8 @@ public class Validate {
         validateExistPixKey(keyValue);
 
         switch (pixKey.getKeyType().toLowerCase()) {
-            case "celular":
-                validateCelular(keyValue);
+            case "phone":
+                validatePhone(keyValue);
                 break;
             case "email":
                 validateEmail(keyValue);
@@ -264,7 +264,7 @@ public class Validate {
 
     //GENERAL
 
-    private void validateCelular(String keyValue) {
+    private void validatePhone(String keyValue) {
         logger.info("Validating phone number: {}", keyValue);
 
         if (!keyValue.matches("^\\+\\d{1,2}\\d{1,3}\\d{9}$")) {

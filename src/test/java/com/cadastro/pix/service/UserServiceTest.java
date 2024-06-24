@@ -6,6 +6,7 @@ import com.cadastro.pix.dto.user.UserDTO;
 import com.cadastro.pix.dto.user.UserListDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.repository.UserRepository;
+import com.cadastro.pix.utils.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,6 +29,10 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
+
+    @Mock
+    private Validate validate;
+
 
     @BeforeEach
     public void setUp() {

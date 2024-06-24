@@ -16,6 +16,7 @@ import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyListWithAccountAndUserDTO;
 import com.cadastro.pix.dto.pixKey.PixKeyWithAccountDTO;
+import com.cadastro.pix.utils.Validate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,10 @@ public class PixKeyServiceTest {
 
     @InjectMocks
     private PixKeyService pixKeyService;
+
+    @Mock
+    private Validate validate;
+
 
     @BeforeEach
     void setUp() {
@@ -144,7 +149,6 @@ public class PixKeyServiceTest {
         Account validAccount = validIndividualAccount();
 
         when(accountRepository.findByAgencyNumberAndAccountNumber(validCreatePixKeyDTO.getAgencyNumber(), validCreatePixKeyDTO.getAccountNumber())).thenReturn(validAccount);
-        when(pixKeyRepository.existsByKeyValueAndActive(validCreatePixKeyDTO.getKeyValue(), true)).thenReturn(false);
         when(pixKeyRepository.save(any(PixKey.class))).thenAnswer(invocation -> {
             PixKey pixKey = invocation.getArgument(0);
             pixKey.setId(UUID.randomUUID());
@@ -436,7 +440,6 @@ public class PixKeyServiceTest {
         assertFalse(((PixKeyDTO) respDTO.getData()).getActive());
         assertInstanceOf(PixKeyDTO.class, respDTO.getData());
     }
-
 
     @Test
     void testDeletePixKey_KeyNotFound() {

@@ -162,7 +162,7 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
@@ -174,19 +174,19 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
     public void testValidateCreateUser_NameLengthMoreThen30Char() {
         User user = validIndividualUserActive();
-        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
+        user.setUserName("UmUserNameComMaisDe30Caracteres");
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid account holder last name", exception.getMessage());
+        assertEquals("Invalid user last name", exception.getMessage());
     }
 
     @Test
@@ -396,7 +396,7 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
@@ -409,20 +409,20 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
     public void testValidateUpdateUser_NameLengthMoreThen30Char() {
         User user = validIndividualUserActive();
-        user.setUserName("UmNomeDeCorrentistaComMaisDe30Caracteres");
+        user.setUserName("UmUserNameComMaisDe30Caracteres");
         String existingUserType = "fisica";
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid account holder name", exception.getMessage());
+        assertEquals("Invalid user name", exception.getMessage());
     }
 
     @Test
@@ -435,7 +435,7 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid account holder last name", exception.getMessage());
+        assertEquals("Invalid user last name", exception.getMessage());
     }
 
     @Test
@@ -825,7 +825,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("celular");
+        pixKey.setKeyType("phone");
         pixKey.setKeyValue("5511976110609");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
@@ -843,7 +843,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("celular");
+        pixKey.setKeyType("phone");
         pixKey.setKeyValue("+551198765");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
@@ -861,7 +861,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("celular");
+        pixKey.setKeyType("phone");
         pixKey.setKeyValue("551198765432101");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
