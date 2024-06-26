@@ -3,19 +3,14 @@ package com.cadastro.pix.utils;
 import com.cadastro.pix.domain.account.Account;
 import com.cadastro.pix.domain.pixKey.PixKey;
 import com.cadastro.pix.domain.user.User;
-import com.cadastro.pix.dto.account.CreateAccountDTO;
-import com.cadastro.pix.dto.pixKey.CreatePixKeyDTO;
-import com.cadastro.pix.exception.EntityNotFoundException;
 import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.PixKeyRepository;
 import com.cadastro.pix.repository.UserRepository;
-import com.cadastro.pix.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -825,7 +820,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("phone");
+        pixKey.setKeyType("celular");
         pixKey.setKeyValue("5511976110609");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
@@ -843,7 +838,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("phone");
+        pixKey.setKeyType("celular");
         pixKey.setKeyValue("+551198765");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
@@ -861,7 +856,7 @@ public class ValidateTest {
         Account account = pixKey.getAccount();
         User user = account.getUser();
 
-        pixKey.setKeyType("phone");
+        pixKey.setKeyType("celular");
         pixKey.setKeyValue("551198765432101");
 
         when(pixKeyRepository.existsByKeyValueAndActive(anyString(), anyBoolean())).thenReturn(false);
