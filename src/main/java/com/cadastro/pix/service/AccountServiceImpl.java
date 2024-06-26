@@ -7,6 +7,7 @@ import com.cadastro.pix.dto.account.SimpleAccountWithUserDTO;
 import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
+import com.cadastro.pix.interfaces.services.AccountService;
 import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.UserRepository;
 import com.cadastro.pix.utils.Validate;
@@ -23,9 +24,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class AccountService {
+public class AccountServiceImpl implements AccountService {
 
-    private final Logger logger = LoggerFactory.getLogger(AccountService.class);
+    private final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     @Autowired
     private AccountRepository accountRepository;
@@ -59,6 +60,36 @@ public class AccountService {
         logger.info("Saving account: {}", account);
         SimpleAccountWithUserDTO accountDTO = new SimpleAccountWithUserDTO(accountRepository.save(account).getId());
         logger.info("Account created successfully: {}", accountDTO);
+        return new RespDTO(HttpStatus.OK, accountDTO);
+    }
+
+    public RespDTO findAllAccounts() {
+        logger.info("Starting process to find all accounts");
+
+        List<Account> accounts = accountRepository.findAll();
+
+        if (accounts.isEmpty()) {
+            logger.error("No Accounts found");
+            throw new EntityNotFoundException("No Accounts found");
+        }
+        logger.info("Number of accounts found: {}", accounts.size());
+
+        SimpleAccountListWithUserDTO accountListDTO = SimpleAccountListWithUserDTO.fromAccounts(accounts);
+        logger.info("Accounts retrieved successfully");
+        return new RespDTO(HttpStatus.OK, accountListDTO);
+    }
+
+    public RespDTO findAccountById(UUID id) {
+        logger.info("Starting process to find account by id: {}", id);
+
+        Account existingAccount = accountRepository.findById(id);
+        if (existingAccount == null) {
+            logger.error("Account not found with id: {}", id);
+            throw new EntityNotFoundException("Account not found");
+        }
+
+        SimpleAccountWithUserDTO accountDTO = new SimpleAccountWithUserDTO(existingAccount);
+        logger.info("Account retrieved successfully: {}", accountDTO);
         return new RespDTO(HttpStatus.OK, accountDTO);
     }
 
@@ -112,36 +143,6 @@ public class AccountService {
 
         SimpleAccountWithUserDTO accountDTO = new SimpleAccountWithUserDTO(accountRepository.save(existingAccount));
         logger.info("Account inactivated successfully: {}", accountDTO);
-        return new RespDTO(HttpStatus.OK, accountDTO);
-    }
-
-    public RespDTO findAllAccounts() {
-        logger.info("Starting process to find all accounts");
-
-        List<Account> accounts = accountRepository.findAll();
-
-        if (accounts.isEmpty()) {
-            logger.error("No Accounts found");
-            throw new EntityNotFoundException("No Accounts found");
-        }
-        logger.info("Number of accounts found: {}", accounts.size());
-
-        SimpleAccountListWithUserDTO accountListDTO = SimpleAccountListWithUserDTO.fromAccounts(accounts);
-        logger.info("Accounts retrieved successfully");
-        return new RespDTO(HttpStatus.OK, accountListDTO);
-    }
-
-    public RespDTO findAccountById(UUID id) {
-        logger.info("Starting process to find account by id: {}", id);
-
-        Account existingAccount = accountRepository.findById(id);
-        if (existingAccount == null) {
-            logger.error("Account not found with id: {}", id);
-            throw new EntityNotFoundException("Account not found");
-        }
-
-        SimpleAccountWithUserDTO accountDTO = new SimpleAccountWithUserDTO(existingAccount);
-        logger.info("Account retrieved successfully: {}", accountDTO);
         return new RespDTO(HttpStatus.OK, accountDTO);
     }
 }

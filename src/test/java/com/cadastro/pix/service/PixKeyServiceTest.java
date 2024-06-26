@@ -47,7 +47,7 @@ public class PixKeyServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private PixKeyService pixKeyService;
+    private PixKeyServiceImpl pixKeyService;
 
     @Mock
     private Validate validate;
@@ -183,7 +183,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findAll()).thenReturn(pixKeys);
 
-        RespDTO respDTO = pixKeyService.findAll();
+        RespDTO respDTO = pixKeyService.findAllPixKeys();
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -198,7 +198,7 @@ public class PixKeyServiceTest {
         when(pixKeyRepository.findAll()).thenReturn(pixKeys);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findAll());
+                pixKeyService.findAllPixKeys());
 
         assertEquals("No Pix keys found", exception.getMessage());
     }
@@ -211,7 +211,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findById(id)).thenReturn(Optional.of(pixKey));
 
-        RespDTO respDTO = pixKeyService.findById(id);
+        RespDTO respDTO = pixKeyService.findPixKeyById(id);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -225,7 +225,7 @@ public class PixKeyServiceTest {
         when(pixKeyRepository.findById(id)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findById(id));
+                pixKeyService.findPixKeyById(id));
 
         assertEquals("Pix key not found", exception.getMessage());
     }
@@ -238,7 +238,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findByKeyType(keyType)).thenReturn(pixKeys);
 
-        RespDTO respDTO = pixKeyService.findByType(keyType);
+        RespDTO respDTO = pixKeyService.findPixKeysByType(keyType);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -251,7 +251,7 @@ public class PixKeyServiceTest {
         when(pixKeyRepository.findByKeyType(keyType)).thenReturn(new ArrayList<>());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByType(keyType));
+                pixKeyService.findPixKeysByType(keyType));
 
         assertEquals("No pix keys found for the specified type", exception.getMessage());
     }
@@ -269,7 +269,7 @@ public class PixKeyServiceTest {
 
         when(accountRepository.findByAgencyNumberAndAccountNumber(agencyNumber, accountNumber)).thenReturn(validAccount);
 
-        RespDTO respDTO = pixKeyService.findByAgencyAndAccount(agencyNumber, accountNumber);
+        RespDTO respDTO = pixKeyService.findPixKeysByAgencyAndAccount(agencyNumber, accountNumber);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -284,7 +284,7 @@ public class PixKeyServiceTest {
         when(accountRepository.findByAgencyNumberAndAccountNumber(agencyNumber, accountNumber)).thenReturn(null);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByAgencyAndAccount(agencyNumber, accountNumber));
+                pixKeyService.findPixKeysByAgencyAndAccount(agencyNumber, accountNumber));
 
         assertEquals("There is no such account with this agency number and account", exception.getMessage());
     }
@@ -299,7 +299,7 @@ public class PixKeyServiceTest {
         when(accountRepository.findByAgencyNumberAndAccountNumber(agencyNumber, accountNumber)).thenReturn(account);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByAgencyAndAccount(agencyNumber, accountNumber));
+                pixKeyService.findPixKeysByAgencyAndAccount(agencyNumber, accountNumber));
 
         assertEquals("No pix keys found for the specified type", exception.getMessage());
     }
@@ -312,7 +312,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findByUserName(userName)).thenReturn(pixKeys);
 
-        RespDTO respDTO = pixKeyService.findByUserName(userName);
+        RespDTO respDTO = pixKeyService.findPixKeysByUserName(userName);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -327,7 +327,7 @@ public class PixKeyServiceTest {
         when(pixKeyRepository.findByUserName(userName)).thenReturn(new ArrayList<>());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByUserName(userName));
+                pixKeyService.findPixKeysByUserName(userName));
 
         assertEquals("There is no user with that name", exception.getMessage());
     }
@@ -343,7 +343,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findByCreatedAtBetween(startOfDay, endOfDay)).thenReturn(pixKeys);
 
-        RespDTO respDTO = pixKeyService.findByCreatedAt(date);
+        RespDTO respDTO = pixKeyService.findPixKeysByCreatedAt(date);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -354,7 +354,7 @@ public class PixKeyServiceTest {
 
     @Test
     void testFindByCreatedAt_DateNull() {
-        RespDTO respDTO = pixKeyService.findByCreatedAt(null);
+        RespDTO respDTO = pixKeyService.findPixKeysByCreatedAt(null);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.BAD_REQUEST, respDTO.getHttpStatus());
@@ -374,7 +374,7 @@ public class PixKeyServiceTest {
 
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByCreatedAt(date));
+                pixKeyService.findPixKeysByCreatedAt(date));
 
         assertEquals("No Pix keys found on that date", exception.getMessage());
     }
@@ -390,7 +390,7 @@ public class PixKeyServiceTest {
 
         when(pixKeyRepository.findByInactivatedAtBetween(startOfDay, endOfDay)).thenReturn(pixKeys);
 
-        RespDTO respDTO = pixKeyService.findByInactivatedAt(date);
+        RespDTO respDTO = pixKeyService.findPixKeysByInactivatedAt(date);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.OK, respDTO.getHttpStatus());
@@ -399,7 +399,7 @@ public class PixKeyServiceTest {
 
     @Test
     void testFindByInactivatedAt_DateNull() {
-        RespDTO respDTO = pixKeyService.findByInactivatedAt(null);
+        RespDTO respDTO = pixKeyService.findPixKeysByInactivatedAt(null);
 
         assertNotNull(respDTO);
         assertEquals(HttpStatus.BAD_REQUEST, respDTO.getHttpStatus());
@@ -419,7 +419,7 @@ public class PixKeyServiceTest {
 
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
-                pixKeyService.findByInactivatedAt(date));
+                pixKeyService.findPixKeysByInactivatedAt(date));
 
         assertEquals("There is no pix key inactivated on this date", exception.getMessage());
     }

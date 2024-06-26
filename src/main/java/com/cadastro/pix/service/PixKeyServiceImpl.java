@@ -9,6 +9,7 @@ import com.cadastro.pix.dto.pixKey.PixKeyWithAccountDTO;
 import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
+import com.cadastro.pix.interfaces.services.PixKeyService;
 import com.cadastro.pix.repository.AccountRepository;
 import com.cadastro.pix.repository.PixKeyRepository;
 import com.cadastro.pix.repository.UserRepository;
@@ -26,13 +27,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
-public class PixKeyService {
+public class PixKeyServiceImpl implements PixKeyService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PixKeyService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PixKeyServiceImpl.class);
 
     @Autowired
     private PixKeyRepository pixKeyRepository;
@@ -69,8 +68,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyDTO);
     }
 
-    @Transactional
-    public RespDTO findAll() {
+    public RespDTO findAllPixKeys() {
         logger.info("Finding all PixKeys");
         List<PixKey> pixKeys = pixKeyRepository.findAll();
         if (pixKeys.isEmpty()) {
@@ -83,8 +81,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyList);
     }
 
-    @Transactional
-    public RespDTO findById(UUID id) {
+    public RespDTO findPixKeyById(UUID id) {
         logger.info("Finding PixKey by id: {}", id);
         PixKey pixKey = pixKeyRepository.findById(id).orElse(null);
         if (pixKey == null) {
@@ -97,8 +94,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyDTO);
     }
 
-    @Transactional
-    public RespDTO findByType(String keyType) {
+    public RespDTO findPixKeysByType(String keyType) {
         logger.info("Finding PixKeys by type: {}", keyType);
         List<PixKey> pixKeys = pixKeyRepository.findByKeyType(keyType);
         if (pixKeys.isEmpty()) {
@@ -111,8 +107,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyList);
     }
 
-    @Transactional
-    public RespDTO findByAgencyAndAccount(int agencyNumber, int accountNumber) {
+    public RespDTO findPixKeysByAgencyAndAccount(int agencyNumber, int accountNumber) {
         logger.info("Finding PixKeys by agency number: {} and account number: {}", agencyNumber, accountNumber);
         Account account = accountRepository.findByAgencyNumberAndAccountNumber(agencyNumber, accountNumber);
         if (account == null) {
@@ -131,7 +126,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyList);
     }
 
-    public RespDTO findByUserName(String userName) {
+    public RespDTO findPixKeysByUserName(String userName) {
         logger.info("Finding PixKeys by user name: {}", userName);
         List<PixKey> pixKeys = pixKeyRepository.findByUserName(userName);
         if (pixKeys.isEmpty()) {
@@ -144,7 +139,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyList);
     }
 
-    public RespDTO findByCreatedAt(LocalDate date) {
+    public RespDTO findPixKeysByCreatedAt(LocalDate date) {
         logger.info("Finding PixKeys by creation date: {}", date);
         if (date == null) {
             logger.error("Creation date must be provided for consultation");
@@ -165,7 +160,7 @@ public class PixKeyService {
         return new RespDTO(HttpStatus.OK, pixKeyList);
     }
 
-    public RespDTO findByInactivatedAt(LocalDate date) {
+    public RespDTO findPixKeysByInactivatedAt(LocalDate date) {
         logger.info("Finding PixKeys by inactivation date: {}", date);
         if (date == null) {
             logger.error("Inactivation date must be provided for consultation");

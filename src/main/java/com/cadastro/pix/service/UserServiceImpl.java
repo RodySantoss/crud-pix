@@ -6,6 +6,7 @@ import com.cadastro.pix.domain.user.User;
 import com.cadastro.pix.dto.user.UserDTO;
 import com.cadastro.pix.dto.user.UserListDTO;
 import com.cadastro.pix.exception.EntityNotFoundException;
+import com.cadastro.pix.interfaces.services.UserService;
 import com.cadastro.pix.repository.UserRepository;
 import com.cadastro.pix.utils.Validate;
 import jakarta.transaction.Transactional;
@@ -20,12 +21,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 

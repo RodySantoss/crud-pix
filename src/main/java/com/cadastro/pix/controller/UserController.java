@@ -2,17 +2,14 @@ package com.cadastro.pix.controller;
 
 import com.cadastro.pix.dto.resp.RespDTO;
 import com.cadastro.pix.domain.user.User;
-import com.cadastro.pix.exception.EntityNotFoundException;
-import com.cadastro.pix.service.UserService;
+import com.cadastro.pix.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,7 +22,7 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @PostMapping
     public ResponseEntity<RespDTO> createUser(@Valid @RequestBody User user) {
