@@ -42,6 +42,7 @@ public class Validate {
         logger.info("Validating updated fields for user: {}", user);
 
         validateUserType(user.getPersonType(), existingUserType);
+        validateExistUser(user);
         validateUser(user);
     }
 
@@ -266,8 +267,8 @@ public class Validate {
         logger.info("Validating phone number: {}", keyValue);
 
         if (!keyValue.matches("^\\+\\d{1,2}\\d{1,3}\\d{9}$")) {
-            logger.error("Invalid phone format: {}", keyValue);
-            throw new IllegalArgumentException("Invalid phone format");
+            logger.error("Invalid phone number: {}", keyValue);
+            throw new IllegalArgumentException("Invalid phone number");
         }
     }
 
@@ -289,14 +290,16 @@ public class Validate {
     private void validateCPF(String keyValue) {
         logger.info("Validating CPF: {}", keyValue);
 
-        if (!isNumeric(keyValue)) {
-            logger.error("CPF must only contain numbers: {}", keyValue);
-            throw new IllegalArgumentException("The CPF must only contain numbers");
-        }
         if (keyValue.length() != 11 || keyValue.matches("(\\d)\\1{10}")) {
             logger.error("Invalid CPF: {}", keyValue);
             throw new IllegalArgumentException("Invalid CPF");
         }
+
+        if (!isNumeric(keyValue)) {
+            logger.error("CPF must only contain numbers: {}", keyValue);
+            throw new IllegalArgumentException("The CPF must only contain numbers");
+        }
+
         int[] digits = new int[11];
         for (int i = 0; i < 11; i++) {
             digits[i] = keyValue.charAt(i) - '0';
@@ -326,14 +329,16 @@ public class Validate {
     private void validateCNPJ(String keyValue) {
         logger.info("Validating CNPJ: {}", keyValue);
 
-        if (!isNumeric(keyValue)) {
-            logger.error("CNPJ must only contain numbers: {}", keyValue);
-            throw new IllegalArgumentException("The CNPJ must only contain numbers");
-        }
         if (keyValue.length() != 14 || keyValue.matches("(\\d)\\1{13}")) {
             logger.error("Invalid CNPJ: {}", keyValue);
             throw new IllegalArgumentException("Invalid CNPJ");
         }
+
+        if (!isNumeric(keyValue)) {
+            logger.error("CNPJ must only contain numbers: {}", keyValue);
+            throw new IllegalArgumentException("The CNPJ must only contain numbers");
+        }
+
         int[] digits = new int[14];
         for (int i = 0; i < 14; i++) {
             digits[i] = keyValue.charAt(i) - '0';

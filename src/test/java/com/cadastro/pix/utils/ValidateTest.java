@@ -205,7 +205,7 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -218,7 +218,7 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ValidateTest {
             validate.validateCreateUser(user);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -443,7 +443,7 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -456,7 +456,7 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -469,7 +469,7 @@ public class ValidateTest {
             validate.validateUpdateUser(user, existingUserType);
         });
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -828,7 +828,7 @@ public class ValidateTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 validate.validateCreatePixKey(pixKey, pixKeys, account, user));
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -846,7 +846,7 @@ public class ValidateTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 validate.validateCreatePixKey(pixKey, pixKeys, account, user));
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
@@ -864,7 +864,7 @@ public class ValidateTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 validate.validateCreatePixKey(pixKey, pixKeys, account, user));
 
-        assertEquals("Invalid phone format", exception.getMessage());
+        assertEquals("Invalid phone number", exception.getMessage());
     }
 
     @Test
