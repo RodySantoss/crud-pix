@@ -25,18 +25,18 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @NotNull(message = "accountType must not be null")
+    @NotNull(message = "Account type must not be null")
     @Pattern(regexp = "^(corrente|poupança)$", message = "Invalid account type")
     @Column(name = "account_type", nullable = false, length = 10)
     private String accountType;
 
-    @NotNull(message = "agencyNumber must not be null")
+    @NotNull(message = "Agency number must not be null")
     @Min(value = 1, message = "Invalid agency number")
     @Max(value = 9999, message = "Invalid agency number")
     @Column(name = "agency_number", nullable = false)
     private Integer agencyNumber;
 
-    @NotNull(message = "accountNumber must not be null")
+    @NotNull(message = "Account number must not be null")
     @Min(value = 1, message = "Invalid account number")
     @Max(value = 99999999, message = "Invalid account number")
     @Column(name = "account_number", nullable = false)

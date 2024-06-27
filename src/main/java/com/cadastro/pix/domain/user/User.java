@@ -23,12 +23,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @NotNull(message = "personType must not be null")
+    @NotNull(message = "Person type must not be null")
     @Pattern(regexp = "^(fisica|juridica)$", message = "Invalid person type")
     @Column(name = "person_type", nullable = false, length = 10)
     private String personType;
 
-    @NotNull(message = "userName must not be null")
+    @NotNull(message = "User name must not be null")
     @Size(max = 30, message = "User name too long")
     @Column(name = "user_name", nullable = false, length = 30)
     private String userName;
@@ -37,17 +37,17 @@ public class User {
     @Column(name = "user_last_name", length = 45)
     private String userLastName;
 
-    @NotNull(message = "identification must not be null")
+    @NotNull(message = "Identification must not be null")
     @Size(max = 14, message = "Identification number too long")
     @Column(name = "identification", nullable = false, length = 14)
     private String identification;
 
-    @NotNull(message = "phone must not be null")
+    @NotNull(message = "Phone must not be null")
     @Size(max = 15, message = "Phone number too long")
     @Column(name = "phone", nullable = false, length = 14)
     private String phone;
 
-    @NotNull(message = "email must not be null")
+    @NotNull(message = "Email must not be null")
     @Size(max = 77, message = "Email too long")
     @Column(name = "email", nullable = false, length = 77)
     private String email;

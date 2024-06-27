@@ -24,11 +24,11 @@ public class PixKey {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @NotNull(message = "keyType must not be null")
+    @NotNull(message = "Key type must not be null")
     @Column(name = "key_type", nullable = false, length = 9)
     private String keyType;
 
-    @NotNull(message = "keyValue must not be null")
+    @NotNull(message = "Key value must not be null")
     @Column(name = "key_value", nullable = false, length = 77)
     private String keyValue;
 
