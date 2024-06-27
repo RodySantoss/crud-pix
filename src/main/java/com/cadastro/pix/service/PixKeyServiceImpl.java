@@ -131,7 +131,7 @@ public class PixKeyServiceImpl implements PixKeyService {
         List<PixKey> pixKeys = pixKeyRepository.findByUserName(userName);
         if (pixKeys.isEmpty()) {
             logger.error("No PixKeys found for user name: {}", userName);
-            throw new EntityNotFoundException("There is no user with that name");
+            throw new EntityNotFoundException("No pix keys found for that name");
         }
 
         PixKeyListWithAccountAndUserDTO pixKeyList = PixKeyListWithAccountAndUserDTO.fromPixKeys(pixKeys);

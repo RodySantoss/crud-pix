@@ -329,7 +329,7 @@ public class PixKeyServiceTest {
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () ->
                 pixKeyService.findPixKeysByUserName(userName));
 
-        assertEquals("There is no user with that name", exception.getMessage());
+        assertEquals("No pix keys found for that name", exception.getMessage());
     }
 
     @Test

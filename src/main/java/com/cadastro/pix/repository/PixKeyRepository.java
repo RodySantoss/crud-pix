@@ -21,7 +21,7 @@ public interface PixKeyRepository extends JpaRepository<PixKey, UUID> {
     @Query("SELECT p FROM PixKey p WHERE p.createdAt >= :startOfDay AND p.createdAt < :endOfDay")
     List<PixKey> findByCreatedAtBetween(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 
-    @Query("SELECT p FROM PixKey p WHERE p.createdAt >= :startOfDay AND p.createdAt < :endOfDay")
+    @Query("SELECT p FROM PixKey p WHERE p.inactivatedAt >= :startOfDay AND p.createdAt < :endOfDay")
     List<PixKey> findByInactivatedAtBetween(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 
     List<PixKey> findByKeyType(String keyType);

@@ -121,6 +121,7 @@ public class Validate {
 
     public void validateUpdateAccount(Account account) {
         logger.info("Validating account update fields for account: {}", account);
+        validateExistAccount(account);
         validateAccount(account);
         logger.info("Account update fields validated successfully");
     }
